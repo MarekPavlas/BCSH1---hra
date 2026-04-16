@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 109be33111f3bcd48a8ed6c0026e3e6d, type: 3}
+  m_Name: BulletUpgrade
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponUpgradeConfig
+  id: 0
+  displayName: 
+  maxLevel: 3
+  level1:
+    damage: 50
+    fireInterval: 0.1
+    range: 25
+    projectileSpeed: 20
+    aoeRadius: 0
+    projectileCount: 1
+    maxSimultaneous: -1
+  level2:
+    damage: 8
+    fireInterval: 0.9
+    range: 27
+    projectileSpeed: 20
+    aoeRadius: 0
+    projectileCount: 1
+    maxSimultaneous: -1
+  level3:
+    damage: 10
+    fireInterval: 0.75
+    range: 30
+    projectileSpeed: 22
+    aoeRadius: 0
+    projectileCount: 2
+    maxSimultaneous: -1
