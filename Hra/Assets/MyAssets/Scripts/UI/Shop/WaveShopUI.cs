@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -7,12 +8,21 @@ using UnityEngine.UI;
 
 public class WaveShopUI : MonoBehaviour
 {
+    [Serializable]
+    public struct RarityChanceConfig
+    {
+        public ItemRarity rarity;
+        [Min(0f)] public float baseChance;
+        public float luckBonusPerPoint;
+    }
+
     [Header("Refs")]
     public WaveManager waveManager;
     public CurrencyWallet wallet;
     public PlayerWeapons playerWeapons;
     public PassiveInventory passiveInventory;
     public WeaponInventoryUI weaponInventoryUI;
+    public PlayerStats playerStats;
 
     [Header("UI")]
     public GameObject panelRoot;
@@ -41,6 +51,9 @@ public class WaveShopUI : MonoBehaviour
     public bool preferUnownedWeapons = true;
     [Range(0f, 1f)] public float upgradeOfferChanceWhileUnownedExist = 0.3f;
 
+    [Header("Rarity Chances")]
+    public List<RarityChanceConfig> rarityChances = new();
+
     [Header("Pause while open")]
     public bool pauseGameWhileOpen = true;
     public MonoBehaviour[] disableWhileOpen;
@@ -57,7 +70,7 @@ public class WaveShopUI : MonoBehaviour
         public bool wasStopped;
     }
 
-    [System.Serializable]
+    [Serializable]
     struct Offer
     {
         public bool isPassive;
@@ -67,11 +80,14 @@ public class WaveShopUI : MonoBehaviour
 
     void Awake()
     {
+        EnsureDefaultRarityChances();
+
         if (waveManager == null) waveManager = FindFirstObjectByType<WaveManager>();
         if (wallet == null) wallet = FindFirstObjectByType<CurrencyWallet>();
         if (playerWeapons == null) playerWeapons = FindFirstObjectByType<PlayerWeapons>();
         if (passiveInventory == null) passiveInventory = FindFirstObjectByType<PassiveInventory>();
         if (weaponInventoryUI == null) weaponInventoryUI = GetComponentInChildren<WeaponInventoryUI>(true);
+        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
 
         if (panelRoot != null)
             panelRoot.SetActive(false);
@@ -87,6 +103,11 @@ public class WaveShopUI : MonoBehaviour
 
         UpdateRerollUI();
         UpdateCurrencyUI();
+    }
+
+    void OnValidate()
+    {
+        EnsureDefaultRarityChances();
     }
 
     void OnDestroy()
@@ -202,14 +223,16 @@ public class WaveShopUI : MonoBehaviour
                 bool canAfford = def != null && wallet != null && wallet.CanAfford(def.shopPrice);
 
                 cards[i].Bind(
-                    def.icon,
-                    def.displayName,
-                    GetDescription(def != null ? def.description : null),
-                    def.shopPrice,
-                    canAfford,
-                    canBuy,
-                    () => BuyPassive(def, def.shopPrice, slotIndex)
-                );
+    def.icon,
+    def.displayName,
+    GetDescription(def != null ? def.description : null),
+    def.shopPrice,
+    canAfford,
+    canBuy,
+    def.rarity,
+    () => BuyPassive(def, def.shopPrice, slotIndex)
+);
+
             }
             else
             {
@@ -218,18 +241,21 @@ public class WaveShopUI : MonoBehaviour
                 int currentLevel = def != null ? playerWeapons.GetLevel(def.id) : 0;
                 int maxLevel = def != null ? playerWeapons.GetMaxLevel(def.id) : 1;
 
-                bool canBuy = def != null && (!owned || currentLevel < maxLevel);
+                bool canUnlockNewWeapon = playerWeapons != null && playerWeapons.CanUnlockMoreWeapons();
+                bool canBuyMore = def != null && ((owned && currentLevel < maxLevel) || (!owned && canUnlockNewWeapon));
                 bool canAfford = def != null && wallet != null && wallet.CanAfford(def.shopPrice);
 
                 cards[i].Bind(
-                    def.icon,
-                    GetWeaponOfferLabel(def, owned, currentLevel, maxLevel),
-                    GetDescription(def != null ? def.description : null),
-                    def.shopPrice,
-                    canAfford,
-                    canBuy,
-                    () => BuyWeapon(def, def.shopPrice, slotIndex)
-                );
+    def.icon,
+    GetWeaponOfferLabel(def, owned, currentLevel, maxLevel),
+    GetDescription(def != null ? def.description : null),
+    def.shopPrice,
+    canAfford,
+    canBuyMore,
+    def.rarity,
+    () => BuyWeapon(def, def.shopPrice, slotIndex)
+);
+
             }
         }
     }
@@ -295,6 +321,9 @@ public class WaveShopUI : MonoBehaviour
 
         bool owned = playerWeapons.HasWeapon(def.id);
         int maxLevel = playerWeapons.GetMaxLevel(def.id);
+
+        if (!owned && !playerWeapons.CanUnlockMoreWeapons())
+            return;
 
         if (owned && playerWeapons.GetLevel(def.id) >= maxLevel)
             return;
@@ -427,17 +456,20 @@ public class WaveShopUI : MonoBehaviour
         if (!canPickPassive && !canPickWeapon)
             return false;
 
-        bool tryPassiveFirst = canPickPassive && (!canPickWeapon || Random.value < passiveOfferChance);
+        bool tryPassiveFirst = canPickPassive && (!canPickWeapon || UnityEngine.Random.value < passiveOfferChance);
 
         if (tryPassiveFirst)
         {
-            int idx = Random.Range(0, passivePool.Count);
-            offer = new Offer
+            PassiveItemDefinition passive = PickPassiveByLuck(passivePool);
+            if (passive != null)
             {
-                isPassive = true,
-                passive = passivePool[idx]
-            };
-            return true;
+                offer = new Offer
+                {
+                    isPassive = true,
+                    passive = passive
+                };
+                return true;
+            }
         }
 
         if (canPickWeapon)
@@ -456,13 +488,16 @@ public class WaveShopUI : MonoBehaviour
 
         if (canPickPassive)
         {
-            int idx = Random.Range(0, passivePool.Count);
-            offer = new Offer
+            PassiveItemDefinition passive = PickPassiveByLuck(passivePool);
+            if (passive != null)
             {
-                isPassive = true,
-                passive = passivePool[idx]
-            };
-            return true;
+                offer = new Offer
+                {
+                    isPassive = true,
+                    passive = passive
+                };
+                return true;
+            }
         }
 
         return false;
@@ -474,7 +509,7 @@ public class WaveShopUI : MonoBehaviour
             return null;
 
         if (playerWeapons == null || !preferUnownedWeapons)
-            return weaponPool[Random.Range(0, weaponPool.Count)];
+            return PickWeaponByLuck(weaponPool);
 
         List<WeaponDefinition> unowned = weaponPool
             .Where(w => w != null && !playerWeapons.HasWeapon(w.id))
@@ -490,15 +525,134 @@ public class WaveShopUI : MonoBehaviour
             return null;
 
         if (unowned.Count == 0)
-            return upgrades[Random.Range(0, upgrades.Count)];
+            return PickWeaponByLuck(upgrades);
 
         if (upgrades.Count == 0)
-            return unowned[Random.Range(0, unowned.Count)];
+            return PickWeaponByLuck(unowned);
 
-        bool pickUpgrade = Random.value < upgradeOfferChanceWhileUnownedExist;
-        List<WeaponDefinition> source = pickUpgrade ? upgrades : unowned;
+        bool pickUpgrade = UnityEngine.Random.value < upgradeOfferChanceWhileUnownedExist;
+        return PickWeaponByLuck(pickUpgrade ? upgrades : unowned);
+    }
 
-        return source[Random.Range(0, source.Count)];
+    WeaponDefinition PickWeaponByLuck(List<WeaponDefinition> pool)
+    {
+        return PickByLuck(pool, item => item.rarity);
+    }
+
+    PassiveItemDefinition PickPassiveByLuck(List<PassiveItemDefinition> pool)
+    {
+        return PickByLuck(pool, item => item.rarity);
+    }
+
+    T PickByLuck<T>(List<T> pool, Func<T, ItemRarity> getRarity) where T : class
+    {
+        if (pool == null || pool.Count == 0)
+            return null;
+
+        float luck = GetLuck();
+        Dictionary<ItemRarity, List<T>> grouped = new();
+
+        foreach (T item in pool)
+        {
+            if (item == null)
+                continue;
+
+            ItemRarity rarity = getRarity(item);
+
+            if (!grouped.TryGetValue(rarity, out List<T> bucket))
+            {
+                bucket = new List<T>();
+                grouped.Add(rarity, bucket);
+            }
+
+            bucket.Add(item);
+        }
+
+        if (grouped.Count == 0)
+            return null;
+
+        List<ItemRarity> activeRarities = new();
+        List<float> activeWeights = new();
+        float totalWeight = 0f;
+
+        foreach (ItemRarity rarity in grouped.Keys)
+        {
+            float weight = GetRarityWeight(rarity, luck);
+            if (weight <= 0f)
+                continue;
+
+            activeRarities.Add(rarity);
+            activeWeights.Add(weight);
+            totalWeight += weight;
+        }
+
+        if (totalWeight <= 0f)
+        {
+            List<T> allAvailable = grouped.Values.SelectMany(x => x).ToList();
+            return allAvailable[UnityEngine.Random.Range(0, allAvailable.Count)];
+        }
+
+        float roll = UnityEngine.Random.Range(0f, totalWeight);
+
+        for (int i = 0; i < activeRarities.Count; i++)
+        {
+            roll -= activeWeights[i];
+            if (roll <= 0f)
+            {
+                List<T> bucket = grouped[activeRarities[i]];
+                return bucket[UnityEngine.Random.Range(0, bucket.Count)];
+            }
+        }
+
+        List<T> fallback = grouped.Values.SelectMany(x => x).ToList();
+        return fallback[UnityEngine.Random.Range(0, fallback.Count)];
+    }
+
+    float GetRarityWeight(ItemRarity rarity, float luck)
+    {
+        for (int i = 0; i < rarityChances.Count; i++)
+        {
+            if (rarityChances[i].rarity == rarity)
+                return Mathf.Max(0f, rarityChances[i].baseChance + rarityChances[i].luckBonusPerPoint * luck);
+        }
+
+        return 0f;
+    }
+
+    float GetLuck()
+    {
+        if (playerStats == null)
+            return 0f;
+
+        return Mathf.Max(0f, playerStats.Get(PlayerStatType.Luck));
+    }
+
+    void EnsureDefaultRarityChances()
+    {
+        if (rarityChances == null)
+            rarityChances = new List<RarityChanceConfig>();
+
+        AddMissingRarity(ItemRarity.COMMON, 70f, -4f);
+        AddMissingRarity(ItemRarity.UNCOMMON, 20f, 2f);
+        AddMissingRarity(ItemRarity.RARE, 5f, 1.2f);
+        AddMissingRarity(ItemRarity.EPIC, 4f, 0.6f);
+        AddMissingRarity(ItemRarity.LEGENDARY, 1f, 0.2f);
+    }
+
+    void AddMissingRarity(ItemRarity rarity, float baseChance, float luckBonusPerPoint)
+    {
+        for (int i = 0; i < rarityChances.Count; i++)
+        {
+            if (rarityChances[i].rarity == rarity)
+                return;
+        }
+
+        rarityChances.Add(new RarityChanceConfig
+        {
+            rarity = rarity,
+            baseChance = baseChance,
+            luckBonusPerPoint = luckBonusPerPoint
+        });
     }
 
     bool CanOfferWeapon(WeaponDefinition def)

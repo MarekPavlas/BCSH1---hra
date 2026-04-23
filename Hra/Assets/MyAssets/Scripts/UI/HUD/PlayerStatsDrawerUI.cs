@@ -178,14 +178,11 @@ public class PlayerStatsDrawerUI : MonoBehaviour
         sb.AppendLine($"Range: {stats.range.Value:0.00}");
         sb.AppendLine($"Move Speed: {stats.moveSpeed.Value:0.00}");
         sb.AppendLine($"Projectile Speed: {stats.projectileSpeed.Value:0.00}");
-        sb.AppendLine($"Projectile Bonus: +{stats.GetProjectileBonus()}");
         sb.AppendLine($"Pickup Range: {stats.pickupRange.Value:0.00}");
         sb.AppendLine($"Money Gain: {stats.moneyGain.Value:0.00}");
         sb.AppendLine($"Luck: {stats.luck.Value:0.00}");
-        sb.AppendLine($"Damage Taken: {stats.damageTaken.Value:0.00}");
         sb.AppendLine($"Crit Chance: {stats.critChance.Value:0.00}");
         sb.AppendLine($"Crit Damage: {stats.critDamage.Value:0.00}");
-        sb.AppendLine($"Dodge: {stats.dodge.Value:0.00}");
         sb.AppendLine($"Item Price: {stats.itemPrice.Value:0.00}");
         return sb.ToString();
     }

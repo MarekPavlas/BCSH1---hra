@@ -10,14 +10,11 @@ public enum PlayerStatType
     AttackSpeed,
     Range,
     ProjectileSpeed,
-    ProjectileCount,
     PickupRange,
     MoneyGain,
     Luck,
-    DamageTaken,
     CritChance,
     CritDamage,
-    Dodge,
     ItemPrice
 }
 
@@ -66,12 +63,11 @@ public class PlayerStats : MonoBehaviour
     [Header("Movement")]
     public StatBlock moveSpeed = new StatBlock { baseValue = 12f };
 
-    [Header("Combat")]
+    [Header("Combat Multipliers")]
     public StatBlock damage = new StatBlock { baseValue = 1f };
     public StatBlock attackSpeed = new StatBlock { baseValue = 1f };
     public StatBlock range = new StatBlock { baseValue = 1f };
     public StatBlock projectileSpeed = new StatBlock { baseValue = 1f };
-    public StatBlock projectileCount = new StatBlock { baseValue = 0f };
 
     [Header("Utility")]
     public StatBlock pickupRange = new StatBlock { baseValue = 2.5f };
@@ -79,13 +75,9 @@ public class PlayerStats : MonoBehaviour
     public StatBlock luck = new StatBlock { baseValue = 0f };
     public StatBlock itemPrice = new StatBlock { baseValue = 1f };
 
-    [Header("Defense")]
-    public StatBlock damageTaken = new StatBlock { baseValue = 1f };
-    public StatBlock dodge = new StatBlock { baseValue = 0f };
-
     [Header("Crit")]
     public StatBlock critChance = new StatBlock { baseValue = 0f };
-    public StatBlock critDamage = new StatBlock { baseValue = 1f };
+    public StatBlock critDamage = new StatBlock { baseValue = 2f };
 
     [Header("Progression")]
     public int currentLevel = 1;
@@ -139,11 +131,16 @@ public class PlayerStats : MonoBehaviour
             debugNext = Time.time + debugPrintEvery;
             Debug.Log(
                 $"[PlayerStats] HP {currentHP:0.0}/{maxHp.Value:0.0} | " +
-                $"Move {moveSpeed.Value:0.00} | Dmg x{damage.Value:0.00} | " +
-                $"AS x{attackSpeed.Value:0.00} | Range x{range.Value:0.00} | " +
-                $"ProjSpeed x{projectileSpeed.Value:0.00} | Proj+{GetProjectileBonus()} | " +
-                $"Money x{moneyGain.Value:0.00} | Luck {luck.Value:0.00} | " +
-                $"Crit {critChance.Value:0.00} | CritDmg x{critDamage.Value:0.00} | " +
+                $"Move {moveSpeed.Value:0.00} | " +
+                $"Dmg {damage.Value * 100f:0}% | " +
+                $"AS {attackSpeed.Value * 100f:0}% | " +
+                $"Range {range.Value * 100f:0}% | " +
+                $"ProjSpeed {projectileSpeed.Value * 100f:0}% | " +
+                $"Money {moneyGain.Value * 100f:0}% | " +
+                $"Luck {luck.Value:0.##} | " +
+                $"Crit {critChance.Value * 100f:0}% | " +
+                $"CritDmg {critDamage.Value * 100f:0}% | " +
+                $"ItemPrice {itemPrice.Value * 100f:0}% | " +
                 $"Lvl {currentLevel} XP {currentXP}/{xpToNextLevel} | Crystals {totalCrystals}"
             );
         }
@@ -182,18 +179,15 @@ public class PlayerStats : MonoBehaviour
 
     public float Get(PlayerStatType type) => GetBlock(type).Value;
 
-    public int GetProjectileBonus() => Mathf.RoundToInt(projectileCount.Value);
-
     public float TakeDamage(float amount)
     {
         if (amount <= 0f)
             return currentHP;
 
-        float final = amount * damageTaken.Value;
-        currentHP = Mathf.Max(0f, currentHP - final);
+        currentHP = Mathf.Max(0f, currentHP - amount);
 
         if (debugLogs)
-            Debug.Log($"[PlayerStats] Took {final:0.0} dmg -> HP {currentHP:0.0}/{maxHp.Value:0.0}");
+            Debug.Log($"[PlayerStats] Took {amount:0.0} dmg -> HP {currentHP:0.0}/{maxHp.Value:0.0}");
 
         return currentHP;
     }
@@ -244,21 +238,24 @@ public class PlayerStats : MonoBehaviour
         attackSpeed.ResetRuntime();
         range.ResetRuntime();
         projectileSpeed.ResetRuntime();
-        projectileCount.ResetRuntime();
 
         pickupRange.ResetRuntime();
         moneyGain.ResetRuntime();
         luck.ResetRuntime();
         itemPrice.ResetRuntime();
 
-        damageTaken.ResetRuntime();
-        dodge.ResetRuntime();
-
         critChance.ResetRuntime();
         critDamage.ResetRuntime();
 
         currentHP = Mathf.Clamp(currentHP, 0f, maxHp.Value);
     }
+
+    public float ScaleDamage(float weaponBaseDamage) => weaponBaseDamage * damage.Value;
+    public float ScaleAttackRate(float weaponBaseAttackRate) => weaponBaseAttackRate * attackSpeed.Value;
+    public float ScaleRange(float weaponBaseRange) => weaponBaseRange * range.Value;
+    public float ScaleProjectileSpeed(float weaponBaseProjectileSpeed) => weaponBaseProjectileSpeed * projectileSpeed.Value;
+    public float ScalePrice(float basePrice) => basePrice * itemPrice.Value;
+    public float ScaleMoneyGain(float baseMoney) => baseMoney * moneyGain.Value;
 
     StatBlock GetBlock(PlayerStatType type)
     {
@@ -271,14 +268,11 @@ public class PlayerStats : MonoBehaviour
             PlayerStatType.AttackSpeed => attackSpeed,
             PlayerStatType.Range => range,
             PlayerStatType.ProjectileSpeed => projectileSpeed,
-            PlayerStatType.ProjectileCount => projectileCount,
             PlayerStatType.PickupRange => pickupRange,
             PlayerStatType.MoneyGain => moneyGain,
             PlayerStatType.Luck => luck,
-            PlayerStatType.DamageTaken => damageTaken,
             PlayerStatType.CritChance => critChance,
             PlayerStatType.CritDamage => critDamage,
-            PlayerStatType.Dodge => dodge,
             PlayerStatType.ItemPrice => itemPrice,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };

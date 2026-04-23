@@ -108,9 +108,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDrop
   moneyPrefab: {fileID: 1831739412398668525, guid: 709a069ef432b2146914a8442c23137d, type: 3}
-  dropChance: 1
+  moneyDropChance: 0
   minAmount: 1
   maxAmount: 1
+  healthPrefab: {fileID: 3180190772059161819, guid: 0a1f943544a32fe4ab4b1fcebe6a00e5, type: 3}
+  healthDropChance: 1
+  spawnYOffset: 2
+  rayStartHeight: 5
+  rayDistance: 20
+  moneyScatterRadius: 0.15
+  healthScatterRadius: 0.25
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
   debugLogs: 1
 --- !u!114 &-1236981681338598031
 MonoBehaviour:
@@ -143,7 +153,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   damagePerHit: 2
   hitInterval: 0.8
-  hitRadius: 0.6
+  hitRadius: 1
   requireLineOfSight: 0
   lineOfSightMask:
     serializedVersion: 2

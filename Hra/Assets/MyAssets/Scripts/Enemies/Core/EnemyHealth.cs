@@ -21,10 +21,9 @@ public class EnemyHealth : MonoBehaviour
     DamageSource lastSource = DamageSource.Unknown;
     float lastBonusChance = 0f;
     float lastBonusExtraPercent = 0f;
-
     bool isDead = false;
 
-    void Start()
+    void Awake()
     {
         if (currentHealth <= 0f)
             currentHealth = health;
@@ -37,7 +36,8 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(float damage, DamageSource source, float bonusChance, float bonusExtraPercent)
     {
-        if (isDead) return;
+        if (isDead)
+            return;
 
         lastSource = source;
 
@@ -59,7 +59,7 @@ public class EnemyHealth : MonoBehaviour
         currentHealth -= finalDamage;
 
         if (debugLogs)
-            Debug.Log($"[EnemyHealth] {name} dmg={finalDamage:0.00} (base={damage:0.00} x{mult:0.00}) HP {before:0.00}->{currentHealth:0.00} source={source}");
+            Debug.Log($"[EnemyHealth] {name} dmg={finalDamage:0.00} HP {before:0.00}->{currentHealth:0.00} source={source}");
 
         if (currentHealth <= 0f)
             Die();
@@ -67,14 +67,18 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        if (isDead) return;
+        if (isDead)
+            return;
+
         isDead = true;
 
-        var drop = GetComponent<EnemyDrop>();
+        EnemyDrop drop = GetComponent<EnemyDrop>();
+        if (drop == null)
+            drop = GetComponentInChildren<EnemyDrop>();
+
         if (drop != null)
         {
-            bool killedByStack = (lastSource == DamageSource.StackOfMoney);
-
+            bool killedByStack = lastSource == DamageSource.StackOfMoney;
             drop.Drop(killedByStack, lastBonusChance, lastBonusExtraPercent);
         }
 
@@ -84,7 +88,10 @@ public class EnemyHealth : MonoBehaviour
     public void SetMaxHealth(float newMax, bool healToFull)
     {
         health = Mathf.Max(1f, newMax);
-        if (healToFull) currentHealth = health;
-        else currentHealth = Mathf.Min(currentHealth, health);
+
+        if (healToFull)
+            currentHealth = health;
+        else
+            currentHealth = Mathf.Min(currentHealth, health);
     }
 }

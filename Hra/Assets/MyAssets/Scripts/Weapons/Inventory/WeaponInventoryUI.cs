@@ -117,7 +117,7 @@ public class WeaponInventoryUI : MonoBehaviour
             var definition = GetDefinition(weapon);
 
             var item = Instantiate(itemPrefab, container);
-            int maxLevel = definition != null ? definition.maxLevel : 3;
+            int maxLevel = 3;
             Sprite icon = definition != null ? definition.icon : null;
 
             item.Bind(weapon.id, GetWeaponName(weapon), weapon.currentLevel, maxLevel, icon);

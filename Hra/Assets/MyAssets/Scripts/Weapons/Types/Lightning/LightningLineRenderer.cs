@@ -8,8 +8,8 @@ public class LightningLineRenderer : MonoBehaviour
 
     [Header("Shape")]
     [Range(2, 80)] public int segments = 25;
-    public float amplitude = 0.35f;        
-    public float flickerSpeed = 25f;       
+    public float amplitude = 0.35f;
+    public float flickerSpeed = 25f;
 
     [Header("Look")]
     public float startWidth = 0.08f;
@@ -60,7 +60,7 @@ public class LightningLineRenderer : MonoBehaviour
 
             if (i != 0 && i != segments - 1)
             {
-                float fade = Mathf.Sin(t * Mathf.PI); 
+                float fade = Mathf.Sin(t * Mathf.PI);
                 float n1 = Mathf.PerlinNoise(t * 10f, tTime) * 2f - 1f;
                 float n2 = Mathf.PerlinNoise(t * 10f + 100f, tTime) * 2f - 1f;
 

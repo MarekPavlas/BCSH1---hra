@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class LightningWeapon : MonoBehaviour
+public class LightningWeapon : MonoBehaviour, IWeaponLevelApplier
 {
     public enum FirstTargetMode
     {
@@ -9,9 +9,9 @@ public class LightningWeapon : MonoBehaviour
     }
 
     [Header("Refs")]
-    public PlayerStats stats;              
-    public GameObject lightningPrefab;       
-    public Transform player;                
+    public PlayerStats stats;
+    public GameObject lightningPrefab;
+    public Transform player;
 
     [Header("Fire")]
     public float fireInterval = 2f;
@@ -19,20 +19,14 @@ public class LightningWeapon : MonoBehaviour
 
     [Header("Targeting")]
     public FirstTargetMode firstTargetMode = FirstTargetMode.ClosestToPlayer;
-
     public float firstStrikeRange = 25f;
-
     public string enemyTag = "Enemy";
-
     public LayerMask enemyMask = ~0;
-
     public float targetHeightOffset = 1f;
 
     [Header("Chain")]
     [Min(0)] public int maxChains = 3;
-
     [Min(0.1f)] public float chainRange = 8f;
-
     [Range(0.1f, 1f)] public float damageFalloffPerJump = 1f;
 
     [Header("From Sky")]
@@ -44,80 +38,126 @@ public class LightningWeapon : MonoBehaviour
 
     float nextFireTime;
 
+    float currentFireInterval;
+    float currentDamage;
+    float currentFirstStrikeRange;
+
     void Awake()
     {
         if (player == null) player = transform;
         if (stats == null) stats = GetComponent<PlayerStats>();
+
+        currentFireInterval = fireInterval;
+        currentDamage = baseDamage;
+        currentFirstStrikeRange = firstStrikeRange;
+    }
+
+    public void ApplyWeaponLevel(WeaponLevelTuning tuning, int level)
+    {
+        currentFireInterval = Mathf.Max(0.05f, tuning.fireInterval);
+        currentDamage = Mathf.Max(0f, tuning.damage);
+        currentFirstStrikeRange = Mathf.Max(0.1f, tuning.range);
+
+        if (debugLogs)
+        {
+            Debug.Log(
+                $"[LightningWeapon] Apply lvl={level} " +
+                $"dmg={currentDamage:0.0} interval={currentFireInterval:0.00} range={currentFirstStrikeRange:0.0}"
+            );
+        }
     }
 
     void Update()
     {
-        if (lightningPrefab == null) return;
-        if (Time.time < nextFireTime) return;
+        if (lightningPrefab == null)
+            return;
 
-        EnemyHealth first = FindFirstTarget();
-        if (first == null) return;
+        float atkSpd = stats ? Mathf.Max(0.05f, stats.attackSpeed.Value) : 1f;
+        float interval = Mathf.Clamp(currentFireInterval / atkSpd, 0.05f, 10f);
 
-        nextFireTime = Time.time + Mathf.Max(0.05f, fireInterval);
+        if (Time.time < nextFireTime)
+            return;
 
-        float dmgMult = stats ? stats.damage.Value : 1f;
-        float damage = baseDamage * dmgMult;
+        float rangeMult = stats ? Mathf.Max(0.1f, stats.range.Value) : 1f;
+        float effectiveFirstStrikeRange = currentFirstStrikeRange * rangeMult;
+        float effectiveChainRange = chainRange * rangeMult;
 
-        SpawnLightning(first, damage);
+        EnemyHealth first = FindFirstTarget(effectiveFirstStrikeRange);
+        if (first == null)
+            return;
+
+        nextFireTime = Time.time + interval;
+
+        float dmgMult = stats ? Mathf.Max(0f, stats.damage.Value) : 1f;
+        float damage = currentDamage * dmgMult;
+
+        SpawnLightning(first, damage, effectiveChainRange);
     }
 
-    EnemyHealth FindFirstTarget()
+    EnemyHealth FindFirstTarget(float effectiveFirstStrikeRange)
     {
         if (firstTargetMode == FirstTargetMode.RandomAnywhere)
         {
-            var all = GameObject.FindGameObjectsWithTag(enemyTag);
-            if (all == null || all.Length == 0) return null;
+            GameObject[] all = GameObject.FindGameObjectsWithTag(enemyTag);
+            if (all == null || all.Length == 0)
+                return null;
 
             for (int i = 0; i < 10; i++)
             {
-                var go = all[Random.Range(0, all.Length)];
-                if (go == null) continue;
-                var eh = go.GetComponentInParent<EnemyHealth>();
-                if (eh != null && eh.currentHealth > 0f) return eh;
+                GameObject go = all[Random.Range(0, all.Length)];
+                if (go == null)
+                    continue;
+
+                EnemyHealth eh = go.GetComponentInParent<EnemyHealth>();
+                if (eh != null && eh.currentHealth > 0f)
+                    return eh;
             }
+
             return null;
         }
-        else
+
+        Collider[] hits = Physics.OverlapSphere(
+            player.position,
+            effectiveFirstStrikeRange,
+            enemyMask,
+            QueryTriggerInteraction.Ignore
+        );
+
+        EnemyHealth best = null;
+        float bestDist = float.PositiveInfinity;
+
+        foreach (Collider c in hits)
         {
-            Collider[] hits = Physics.OverlapSphere(player.position, firstStrikeRange, enemyMask, QueryTriggerInteraction.Ignore);
-            EnemyHealth best = null;
-            float bestDist = float.PositiveInfinity;
+            if (c == null)
+                continue;
 
-            foreach (var c in hits)
+            Transform root = c.transform.root;
+            if (root == null || !root.CompareTag(enemyTag))
+                continue;
+
+            EnemyHealth eh = c.GetComponentInParent<EnemyHealth>();
+            if (eh == null || eh.currentHealth <= 0f)
+                continue;
+
+            float d = Vector3.Distance(player.position, root.position);
+            if (d < bestDist)
             {
-                if (c == null) continue;
-
-                Transform root = c.transform.root;
-                if (root == null) continue;
-                if (!root.CompareTag(enemyTag)) continue;
-
-                var eh = c.GetComponentInParent<EnemyHealth>();
-                if (eh == null || eh.currentHealth <= 0f) continue;
-
-                float d = Vector3.Distance(player.position, root.position);
-                if (d < bestDist)
-                {
-                    bestDist = d;
-                    best = eh;
-                }
+                bestDist = d;
+                best = eh;
             }
-            return best;
         }
+
+        return best;
     }
 
-    void SpawnLightning(EnemyHealth firstTarget, float damage)
+    void SpawnLightning(EnemyHealth firstTarget, float damage, float effectiveChainRange)
     {
-        var go = Instantiate(lightningPrefab);
-        var chain = go.GetComponent<ChainLightning>();
+        GameObject go = Instantiate(lightningPrefab);
+        ChainLightning chain = go.GetComponent<ChainLightning>();
 
         if (chain == null)
         {
-            Debug.LogWarning("[LightningWeapon] lightningPrefab nemá komponentu ChainLightning.");
+            Debug.LogWarning("[LightningWeapon] lightningPrefab nema komponentu ChainLightning.");
             Destroy(go);
             return;
         }
@@ -130,7 +170,7 @@ public class LightningWeapon : MonoBehaviour
             firstTarget: firstTarget,
             firstHitPos: firstHitPos,
             maxChains: maxChains,
-            chainRange: chainRange,
+            chainRange: effectiveChainRange,
             damage: damage,
             damageFalloffPerJump: damageFalloffPerJump,
             enemyMask: enemyMask,
@@ -142,7 +182,8 @@ public class LightningWeapon : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        if (player == null) return;
+        if (player == null)
+            return;
 
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(player.position, firstStrikeRange);

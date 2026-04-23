@@ -24,13 +24,13 @@ public class AutoShooter : MonoBehaviour, IWeaponLevelApplier
     [Header("Debug")]
     public bool debugLogs = false;
 
-    private float _nextFireTime;
+    float nextFireTime;
 
-    private float currentFireInterval;
-    private float currentDamage;
-    private float currentRange;
-    private float currentBulletSpeed;
-    private int currentProjectiles;
+    float currentFireInterval;
+    float currentDamage;
+    float currentRange;
+    float currentBulletSpeed;
+    int currentProjectiles;
 
     void Awake()
     {
@@ -46,15 +46,19 @@ public class AutoShooter : MonoBehaviour, IWeaponLevelApplier
 
     public void ApplyWeaponLevel(WeaponLevelTuning tuning, int level)
     {
-        currentFireInterval = tuning.fireInterval;
-        currentDamage = tuning.damage;
-        currentRange = tuning.range;
-        currentBulletSpeed = tuning.projectileSpeed;
-        currentProjectiles = tuning.projectileCount;
+        currentFireInterval = Mathf.Max(0.05f, tuning.fireInterval);
+        currentDamage = Mathf.Max(0f, tuning.damage);
+        currentRange = Mathf.Max(0.1f, tuning.range);
+        currentBulletSpeed = Mathf.Max(0.1f, tuning.projectileSpeed);
+        currentProjectiles = Mathf.Max(1, tuning.projectileCount);
 
         if (debugLogs)
         {
-            Debug.Log($"[AutoShooter] Applied level {level}: dmg={currentDamage}, interval={currentFireInterval}, range={currentRange}, speed={currentBulletSpeed}, proj={currentProjectiles}");
+            Debug.Log(
+                $"[AutoShooter] Applied level {level}: " +
+                $"dmg={currentDamage}, interval={currentFireInterval}, range={currentRange}, " +
+                $"speed={currentBulletSpeed}, proj={currentProjectiles}"
+            );
         }
     }
 
@@ -63,69 +67,66 @@ public class AutoShooter : MonoBehaviour, IWeaponLevelApplier
         if (bulletPrefab == null || firePoint == null)
             return;
 
-        Transform target = FindClosestEnemyInRange(out float dist);
+        Transform target = FindClosestEnemyInRange(out _);
         if (target == null)
             return;
 
-        float atkSpd = stats ? stats.attackSpeed.Value : 1f;
-        atkSpd = Mathf.Max(0.05f, atkSpd);
+        float attackSpeedMultiplier = stats != null ? Mathf.Max(0.05f, stats.attackSpeed.Value) : 1f;
+        float interval = Mathf.Clamp(currentFireInterval / attackSpeedMultiplier, 0.05f, 10f);
 
-        float interval = currentFireInterval / atkSpd;
-        interval = Mathf.Clamp(interval, 0.05f, 10f);
-
-        if (Time.time < _nextFireTime)
+        if (Time.time < nextFireTime)
             return;
 
-        _nextFireTime = Time.time + interval;
+        nextFireTime = Time.time + interval;
 
-        float rangeMult = stats ? stats.range.Value : 1f;
-        float range = currentRange * rangeMult;
-        if (dist > range)
-            return;
+        float damageMultiplier = stats != null ? Mathf.Max(0f, stats.damage.Value) : 1f;
+        float finalDamage = currentDamage * damageMultiplier;
 
-        float dmgMult = stats ? stats.damage.Value : 1f;
-        float damage = currentDamage * dmgMult;
+        int projectileCount = Mathf.Clamp(currentProjectiles, 1, 50);
 
-        int projBonus = stats ? stats.GetProjectileBonus() : 0;
-        int projectiles = Mathf.Clamp(currentProjectiles + projBonus, 1, 50);
-
-        Shoot(target, damage, projectiles);
+        Shoot(target, finalDamage, projectileCount);
     }
 
-    void Shoot(Transform target, float damage, int projectiles)
+    void Shoot(Transform target, float damage, int projectileCount)
     {
         Vector3 targetPos = target.position + Vector3.up * targetHeightOffset;
+        float projectileSpeedMultiplier = stats != null ? Mathf.Max(0.1f, stats.projectileSpeed.Value) : 1f;
+        float finalSpeed = currentBulletSpeed * projectileSpeedMultiplier;
 
-        float projSpeedMult = stats ? stats.projectileSpeed.Value : 1f;
-        float finalSpeed = currentBulletSpeed * projSpeedMult;
-
-        for (int i = 0; i < projectiles; i++)
+        for (int i = 0; i < projectileCount; i++)
         {
             Vector3 dir = (targetPos - firePoint.position).normalized;
             Quaternion rot = Quaternion.LookRotation(dir, Vector3.up);
 
-            if (projectiles > 1)
+            if (projectileCount > 1)
             {
-                float t = (i / (float)(projectiles - 1) - 0.5f);
+                float t = i / (float)(projectileCount - 1) - 0.5f;
                 rot *= Quaternion.Euler(0f, t * spreadDegrees, 0f);
             }
 
             GameObject go = Instantiate(bulletPrefab, firePoint.position, rot);
 
-            var pb = go.GetComponent<PiercingBullet>();
-            if (pb != null)
+            PiercingBullet piercingBullet = go.GetComponent<PiercingBullet>();
+            if (piercingBullet != null)
             {
-                pb.speed = finalSpeed;
-                pb.damage = damage;
-                pb.pierceCount = basePierceCount;
+                piercingBullet.Init(
+                    go.transform.forward,
+                    finalSpeed,
+                    damage,
+                    basePierceCount,
+                    piercingBullet.lifetime,
+                    transform.root
+                );
             }
-
-            var b = go.GetComponent<Bullet>();
-            if (b != null)
+            else
             {
-                b.speed = finalSpeed;
-                b.damage = damage;
-                b.Launch(go.transform.forward);
+                Bullet bullet = go.GetComponent<Bullet>();
+                if (bullet != null)
+                {
+                    bullet.speed = finalSpeed;
+                    bullet.damage = damage;
+                    bullet.Launch(go.transform.forward);
+                }
             }
 
             IgnoreCollisionWithPlayer(go);
@@ -139,7 +140,7 @@ public class AutoShooter : MonoBehaviour, IWeaponLevelApplier
             return;
 
         Collider[] myCols = GetComponentsInChildren<Collider>();
-        foreach (var c in myCols)
+        foreach (Collider c in myCols)
         {
             if (c == null)
                 continue;
@@ -154,22 +155,20 @@ public class AutoShooter : MonoBehaviour, IWeaponLevelApplier
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
         Transform best = null;
+        float rangeMultiplier = stats != null ? Mathf.Max(0.1f, stats.range.Value) : 1f;
+        float finalRange = currentRange * rangeMultiplier;
+        Vector3 origin = transform.position;
 
-        float rangeMult = stats ? stats.range.Value : 1f;
-        float range = currentRange * rangeMult;
-
-        Vector3 p = transform.position;
-
-        foreach (var e in enemies)
+        foreach (GameObject enemy in enemies)
         {
-            if (e == null)
+            if (enemy == null)
                 continue;
 
-            float d = Vector3.Distance(p, e.transform.position);
-            if (d < bestDist && d <= range)
+            float dist = Vector3.Distance(origin, enemy.transform.position);
+            if (dist < bestDist && dist <= finalRange)
             {
-                bestDist = d;
-                best = e.transform;
+                bestDist = dist;
+                best = enemy.transform;
             }
         }
 

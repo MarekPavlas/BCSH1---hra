@@ -15,6 +15,7 @@ MonoBehaviour:
   id: 10
   displayName: AK47
   description: 
-  icon: {fileID: 21300000, guid: 6a989cb39867862469f83ed28bf59449, type: 3}
+  icon: {fileID: 21300000, guid: 0517a11047e1d744894a820ddae82611, type: 3}
+  rarity: 0
   maxLevel: 8
   shopPrice: 10

@@ -15,8 +15,8 @@ public class LaserBeamWeapon : MonoBehaviour, IWeaponLevelApplier
 
     [Header("Targeting")]
     public string enemyTag = "Enemy";
-    public LayerMask enemyMask;
-    public LayerMask obstacleMask;
+    public LayerMask enemyMask = ~0;
+    public LayerMask obstacleMask = ~0;
     public float baseRetargetInterval = 0.2f;
     public float aimSmoothing = 18f;
 
@@ -39,38 +39,31 @@ public class LaserBeamWeapon : MonoBehaviour, IWeaponLevelApplier
 
     void Awake()
     {
-        if (line == null) line = GetComponent<LineRenderer>();
-        if (stats == null) stats = GetComponent<PlayerStats>();
+        if (line == null)
+            line = GetComponent<LineRenderer>();
+
+        if (stats == null)
+            stats = GetComponent<PlayerStats>();
 
         currentDamagePerSecond = baseDamagePerSecond;
         currentRange = baseRange;
         currentRetargetInterval = baseRetargetInterval;
 
-        line.positionCount = 2;
-        line.enabled = false;
+        if (line != null)
+        {
+            line.positionCount = 2;
+            line.enabled = false;
+        }
 
         ApplyBeamWidth(true);
     }
 
     void OnValidate()
     {
-        if (line == null) line = GetComponent<LineRenderer>();
+        if (line == null)
+            line = GetComponent<LineRenderer>();
+
         ApplyBeamWidth(true);
-    }
-
-    void ApplyBeamWidth(bool force = false)
-    {
-        if (line == null) return;
-
-        if (!force && Mathf.Approximately(lastBeamWidth, beamWidth))
-            return;
-
-        lastBeamWidth = beamWidth;
-
-        line.widthMultiplier = 1f;
-        line.widthCurve = AnimationCurve.Constant(0f, 1f, 1f);
-        line.startWidth = beamWidth;
-        line.endWidth = beamWidth;
     }
 
     public void ApplyWeaponLevel(WeaponLevelTuning tuning, int level)
@@ -93,23 +86,31 @@ public class LaserBeamWeapon : MonoBehaviour, IWeaponLevelApplier
     {
         ApplyBeamWidth();
 
-        if (firePoint == null)
+        if (firePoint == null || line == null)
         {
-            if (line != null) line.enabled = false;
+            if (line != null)
+                line.enabled = false;
             return;
         }
 
-        float rangeMult = stats ? Mathf.Max(0.1f, stats.range.Value) : 1f;
-        float dmgMult = stats ? Mathf.Max(0f, stats.damage.Value) : 1f;
+        float rangeMultiplier = stats ? Mathf.Max(0.1f, stats.range.Value) : 1f;
+        float damageMultiplier = stats ? Mathf.Max(0f, stats.damage.Value) : 1f;
+        float attackSpeedMultiplier = stats ? Mathf.Max(0.05f, stats.attackSpeed.Value) : 1f;
 
-        float range = currentRange * rangeMult;
-        float dps = currentDamagePerSecond * dmgMult;
+        float finalRange = currentRange * rangeMultiplier;
+        float finalDps = currentDamagePerSecond * damageMultiplier * attackSpeedMultiplier;
         float retargetInterval = Mathf.Clamp(currentRetargetInterval, 0.02f, 2f);
 
-        if (Time.time >= nextRetargetTime)
+        if (currentTarget == null || !IsTargetValid(currentTarget, finalRange))
+        {
+            currentTarget = FindClosestEnemyInRange(finalRange);
+            nextRetargetTime = Time.time + retargetInterval;
+            hasSmoothed = false;
+        }
+        else if (Time.time >= nextRetargetTime)
         {
             nextRetargetTime = Time.time + retargetInterval;
-            currentTarget = FindClosestEnemyInRange(range);
+            currentTarget = FindClosestEnemyInRange(finalRange);
             hasSmoothed = false;
         }
 
@@ -123,16 +124,24 @@ public class LaserBeamWeapon : MonoBehaviour, IWeaponLevelApplier
         Vector3 targetPos = currentTarget.position + Vector3.up * targetHeightOffset;
         Vector3 dir = (targetPos - start).normalized;
 
+        if (dir.sqrMagnitude < 0.0001f)
+        {
+            line.enabled = false;
+            return;
+        }
+
+        Vector3 castStart = start + dir * 0.05f;
+
         bool hitSomething = Physics.Raycast(
-            start,
+            castStart,
             dir,
             out RaycastHit hit,
-            range,
+            finalRange,
             obstacleMask | enemyMask,
             QueryTriggerInteraction.Ignore
         );
 
-        Vector3 end = start + dir * range;
+        Vector3 end = start + dir * finalRange;
         bool canDamageTarget = false;
         EnemyHealth targetHealth = null;
 
@@ -140,24 +149,26 @@ public class LaserBeamWeapon : MonoBehaviour, IWeaponLevelApplier
         {
             end = hit.point;
 
-            bool isEnemyLayer = ((enemyMask.value & (1 << hit.collider.gameObject.layer)) != 0);
+            bool isEnemyLayer = (enemyMask.value & (1 << hit.collider.gameObject.layer)) != 0;
+            bool isEnemyTag = hit.collider.CompareTag(enemyTag) || hit.collider.transform.root.CompareTag(enemyTag);
 
-            if (isEnemyLayer || hit.collider.CompareTag(enemyTag))
+            if (isEnemyLayer || isEnemyTag)
             {
                 targetHealth = hit.collider.GetComponentInParent<EnemyHealth>();
-                canDamageTarget = targetHealth != null;
+                canDamageTarget = targetHealth != null && targetHealth.currentHealth > 0f;
             }
         }
 
         if (canDamageTarget)
         {
-            float dmg = dps * Time.deltaTime;
-            targetHealth.TakeDamage(dmg);
+            float damageThisFrame = finalDps * Time.deltaTime;
+            targetHealth.TakeDamage(damageThisFrame);
 
             if (debugLogs)
             {
                 Debug.Log(
-                    $"[Laser] HIT {targetHealth.name} dmg={dmg:0.00} dps={dps:0.0} range={range:0.0}"
+                    $"[Laser] HIT {targetHealth.name} " +
+                    $"dmg={damageThisFrame:0.00} dps={finalDps:0.0} range={finalRange:0.0}"
                 );
             }
         }
@@ -184,6 +195,34 @@ public class LaserBeamWeapon : MonoBehaviour, IWeaponLevelApplier
         line.SetPosition(1, smoothedEnd);
     }
 
+    void ApplyBeamWidth(bool force = false)
+    {
+        if (line == null)
+            return;
+
+        if (!force && Mathf.Approximately(lastBeamWidth, beamWidth))
+            return;
+
+        lastBeamWidth = beamWidth;
+
+        line.widthMultiplier = 1f;
+        line.widthCurve = AnimationCurve.Constant(0f, 1f, 1f);
+        line.startWidth = beamWidth;
+        line.endWidth = beamWidth;
+    }
+
+    bool IsTargetValid(Transform target, float range)
+    {
+        if (target == null)
+            return false;
+
+        EnemyHealth eh = target.GetComponentInParent<EnemyHealth>();
+        if (eh == null || eh.currentHealth <= 0f)
+            return false;
+
+        return Vector3.Distance(transform.position, target.position) <= range;
+    }
+
     Transform FindClosestEnemyInRange(float range)
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyTag);
@@ -192,15 +231,20 @@ public class LaserBeamWeapon : MonoBehaviour, IWeaponLevelApplier
         float best = Mathf.Infinity;
         Vector3 pos = transform.position;
 
-        foreach (var e in enemies)
+        foreach (GameObject enemy in enemies)
         {
-            if (e == null) continue;
+            if (enemy == null)
+                continue;
 
-            float d = Vector3.Distance(pos, e.transform.position);
-            if (d < best && d <= range)
+            EnemyHealth eh = enemy.GetComponentInParent<EnemyHealth>();
+            if (eh == null || eh.currentHealth <= 0f)
+                continue;
+
+            float dist = Vector3.Distance(pos, enemy.transform.position);
+            if (dist < best && dist <= range)
             {
-                best = d;
-                closest = e.transform;
+                best = dist;
+                closest = enemy.transform;
             }
         }
 

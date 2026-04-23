@@ -29,6 +29,9 @@ public class PlayerWeapons : MonoBehaviour
     public List<WeaponUpgradeConfig> upgradeConfigs = new();
     public int defaultMaxLevel = 3;
 
+    [Header("Limits")]
+    [Min(1)] public int maxOwnedWeapons = 3;
+
     [Header("Debug / Test Mode")]
     public bool testMode = true;
 
@@ -95,6 +98,12 @@ public class PlayerWeapons : MonoBehaviour
     public int GetLevel(WeaponId id) =>
         levels.TryGetValue(id, out var lvl) ? lvl : 0;
 
+    public int GetOwnedWeaponCount() => levels.Count;
+
+    public bool CanUnlockMoreWeapons() => levels.Count < Mathf.Max(1, maxOwnedWeapons);
+
+    public bool IsWeaponCapReached() => !CanUnlockMoreWeapons();
+
     public void Unlock(WeaponId id) => Unlock(id, false);
 
     public void Upgrade(WeaponId id, int maxLevel) => Upgrade(id, maxLevel, false);
@@ -103,6 +112,12 @@ public class PlayerWeapons : MonoBehaviour
     {
         if (testMode) return;
         if (levels.ContainsKey(id)) return;
+
+        if (!CanUnlockMoreWeapons())
+        {
+            Debug.Log($"[PlayerWeapons] Nelze odemknout {id}. Dosazen limit {maxOwnedWeapons} zbrani.");
+            return;
+        }
 
         levels[id] = 1;
 

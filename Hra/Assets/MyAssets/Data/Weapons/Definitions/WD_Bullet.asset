@@ -15,6 +15,7 @@ MonoBehaviour:
   id: 0
   displayName: Bullet
   description: 
-  icon: {fileID: 21300000, guid: 6a989cb39867862469f83ed28bf59449, type: 3}
+  icon: {fileID: 21300000, guid: 14db4aa2914eeae4090c2173bec91405, type: 3}
+  rarity: 0
   maxLevel: 8
   shopPrice: 10

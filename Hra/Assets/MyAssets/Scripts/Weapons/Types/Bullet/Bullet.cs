@@ -47,10 +47,10 @@ public class Bullet : MonoBehaviour
 
         if (other.CompareTag("Enemy") || (other.transform != null && other.transform.root.CompareTag("Enemy")))
         {
-            hasHit = true;          
-            col.enabled = false;    
+            hasHit = true;
+            col.enabled = false;
             rb.linearVelocity = Vector3.zero;
-            rb.isKinematic = true;  
+            rb.isKinematic = true;
 
             var enemy = other.GetComponentInParent<EnemyHealth>();
             if (enemy != null)

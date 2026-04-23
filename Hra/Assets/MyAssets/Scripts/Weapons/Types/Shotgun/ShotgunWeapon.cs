@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
-public class ShotgunWeapon : MonoBehaviour
+public class ShotgunWeapon : MonoBehaviour, IWeaponLevelApplier
 {
     [Header("Refs")]
-    public PlayerStats stats;                 
+    public PlayerStats stats;
     public Transform firePoint;
     public ShotgunPellet pelletPrefab;
 
@@ -14,41 +15,69 @@ public class ShotgunWeapon : MonoBehaviour
     public LayerMask enemyMask = ~0;
     public string enemyTag = "Enemy";
 
-    [Header("Fire")]
-    public float baseFireInterval = 1.0f;     
-    public float baseDamagePerPellet = 4f;    
+    [Header("Fire (BASE)")]
+    public float baseFireInterval = 1.0f;
+    public float baseDamagePerPellet = 4f;
     public float pelletSpeed = 45f;
     public float pelletLifetime = 1.8f;
     [Min(1)] public int pelletCount = 5;
 
     [Header("Spread (degrees)")]
     public float spreadYaw = 10f;
-
     public float spreadPitch = 4f;
-
     public bool randomizePattern = true;
 
     [Header("Debug")]
     public bool debugLogs = false;
 
     float nextFireTime;
-
     readonly Collider[] enemyHits = new Collider[64];
+
+    float currentFireInterval;
+    float currentDamagePerPellet;
+    float currentAimRange;
+    float currentPelletSpeed;
+    int currentPelletCount;
 
     void Awake()
     {
-        if (stats == null) stats = GetComponent<PlayerStats>();
+        if (stats == null)
+            stats = GetComponent<PlayerStats>();
+
+        currentFireInterval = baseFireInterval;
+        currentDamagePerPellet = baseDamagePerPellet;
+        currentAimRange = aimRange;
+        currentPelletSpeed = pelletSpeed;
+        currentPelletCount = pelletCount;
+    }
+
+    public void ApplyWeaponLevel(WeaponLevelTuning tuning, int level)
+    {
+        currentFireInterval = Mathf.Max(0.05f, tuning.fireInterval);
+        currentDamagePerPellet = Mathf.Max(0f, tuning.damage);
+        currentAimRange = Mathf.Max(0.1f, tuning.range);
+        currentPelletSpeed = Mathf.Max(0.1f, tuning.projectileSpeed);
+        currentPelletCount = Mathf.Max(1, tuning.projectileCount);
+
+        if (debugLogs)
+        {
+            Debug.Log(
+                $"[Shotgun] Apply lvl={level} dmg={currentDamagePerPellet} interval={currentFireInterval} " +
+                $"range={currentAimRange} speed={currentPelletSpeed} pellets={currentPelletCount}"
+            );
+        }
     }
 
     void Update()
     {
-        if (firePoint == null || pelletPrefab == null) return;
+        if (firePoint == null || pelletPrefab == null)
+            return;
 
         Vector3 dir;
         if (aimAtClosestEnemy)
         {
             if (!TryGetClosestEnemyDirection(out dir))
-                return; 
+                return;
         }
         else
         {
@@ -56,15 +85,20 @@ public class ShotgunWeapon : MonoBehaviour
         }
 
         float atkSpd = stats ? Mathf.Max(0.05f, stats.attackSpeed.Value) : 1f;
-        float interval = Mathf.Clamp(baseFireInterval / atkSpd, 0.05f, 10f);
+        float interval = Mathf.Clamp(currentFireInterval / atkSpd, 0.05f, 10f);
 
-        if (Time.time < nextFireTime) return;
+        if (Time.time < nextFireTime)
+            return;
+
         nextFireTime = Time.time + interval;
 
         float dmgMult = stats ? Mathf.Max(0f, stats.damage.Value) : 1f;
-        float dmgPerPellet = baseDamagePerPellet * dmgMult;
+        float dmgPerPellet = currentDamagePerPellet * dmgMult;
 
-        FireShotgun(dir, dmgPerPellet);
+        float projSpeedMult = stats ? Mathf.Max(0.1f, stats.projectileSpeed.Value) : 1f;
+        float finalPelletSpeed = currentPelletSpeed * projSpeedMult;
+
+        FireShotgun(dir, dmgPerPellet, finalPelletSpeed);
     }
 
     bool TryGetClosestEnemyDirection(out Vector3 dir)
@@ -72,7 +106,7 @@ public class ShotgunWeapon : MonoBehaviour
         dir = firePoint.forward;
 
         float rangeMult = stats ? Mathf.Max(0.1f, stats.range.Value) : 1f;
-        float range = aimRange * rangeMult;
+        float range = currentAimRange * rangeMult;
 
         int count = Physics.OverlapSphereNonAlloc(
             transform.position,
@@ -82,21 +116,22 @@ public class ShotgunWeapon : MonoBehaviour
             QueryTriggerInteraction.Ignore
         );
 
-        if (count <= 0) return false;
+        if (count <= 0)
+            return false;
 
         Transform best = null;
         float bestDist = float.PositiveInfinity;
-
         Vector3 p = transform.position;
 
         for (int i = 0; i < count; i++)
         {
-            var c = enemyHits[i];
-            if (c == null) continue;
+            Collider c = enemyHits[i];
+            if (c == null)
+                continue;
 
             Transform t = c.transform.root;
-
-            if (!t.CompareTag(enemyTag)) continue;
+            if (!t.CompareTag(enemyTag))
+                continue;
 
             float d = Vector3.Distance(p, t.position);
             if (d < bestDist)
@@ -106,24 +141,27 @@ public class ShotgunWeapon : MonoBehaviour
             }
         }
 
-        if (best == null) return false;
+        if (best == null)
+            return false;
 
         Vector3 targetPos = best.position + Vector3.up * targetHeightOffset;
         Vector3 to = targetPos - firePoint.position;
 
-        if (to.sqrMagnitude < 0.001f) return false;
+        if (to.sqrMagnitude < 0.001f)
+            return false;
 
         dir = to.normalized;
         return true;
     }
 
-    void FireShotgun(Vector3 aimDir, float dmgPerPellet)
+    void FireShotgun(Vector3 aimDir, float dmgPerPellet, float finalPelletSpeed)
     {
         Quaternion baseRot = Quaternion.LookRotation(aimDir.normalized, Vector3.up);
 
-        for (int i = 0; i < pelletCount; i++)
+        for (int i = 0; i < currentPelletCount; i++)
         {
-            float yaw, pitch;
+            float yaw;
+            float pitch;
 
             if (i == 0)
             {
@@ -132,11 +170,11 @@ public class ShotgunWeapon : MonoBehaviour
             }
             else
             {
-                float t = (pelletCount == 1) ? 0.5f : (float)i / (pelletCount - 1);
+                float t = currentPelletCount == 1 ? 0.5f : (float)i / (currentPelletCount - 1);
 
                 yaw = Mathf.Lerp(-spreadYaw, spreadYaw, t);
 
-                float alt = ((i % 2) == 0) ? 1f : -1f;
+                float alt = (i % 2 == 0) ? 1f : -1f;
                 pitch = alt * Mathf.Lerp(0f, spreadPitch, Mathf.Clamp01(t));
 
                 if (randomizePattern)
@@ -149,11 +187,16 @@ public class ShotgunWeapon : MonoBehaviour
             Quaternion spreadRot = baseRot * Quaternion.Euler(pitch, yaw, 0f);
             Vector3 dir = spreadRot * Vector3.forward;
 
-            var pellet = Instantiate(pelletPrefab, firePoint.position, Quaternion.LookRotation(dir, Vector3.up));
-            pellet.Launch(dir, pelletSpeed, dmgPerPellet, pelletLifetime, transform.root);
+            ShotgunPellet pellet = Instantiate(
+                pelletPrefab,
+                firePoint.position,
+                Quaternion.LookRotation(dir, Vector3.up)
+            );
+
+            pellet.Launch(dir, finalPelletSpeed, dmgPerPellet, pelletLifetime, transform.root);
         }
 
         if (debugLogs)
-            Debug.Log($"[Shotgun] Fired pellets={pelletCount} dmg/pellet={dmgPerPellet:0.0}");
+            Debug.Log($"[Shotgun] Fired pellets={currentPelletCount} dmg/pellet={dmgPerPellet:0.0}");
     }
 }

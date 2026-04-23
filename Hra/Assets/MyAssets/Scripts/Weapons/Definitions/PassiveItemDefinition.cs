@@ -4,19 +4,19 @@ using UnityEngine;
 
 public enum StatModMode
 {
-    FlatAdd,          
-    PercentAdd,       
-    PercentPointsAdd, 
-    Multiply          
+    FlatAdd,
+    PercentAdd,
+    PercentPointsAdd,
+    Multiply
 }
 
 public enum PassiveSpecialEffectType
 {
     None,
-    HealOnAcquire,           
-    NextShotBonusAfterDodge, 
-    LowHpStatBonus,          
-    OnHitBonusDamageProc     
+    HealOnAcquire,
+    NextShotBonusAfterDodge,
+    LowHpStatBonus,
+    OnHitBonusDamageProc
 }
 
 [Serializable]

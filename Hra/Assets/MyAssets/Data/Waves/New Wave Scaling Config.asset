@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 140668552f2e1f045819f609f6937272, type: 3}
   m_Name: New Wave Scaling Config
   m_EditorClassIdentifier: Assembly-CSharp::WaveScalingConfig
-  baseEnemyHp: 10
+  baseEnemyHp: 1000
   baseEnemyDamage: 2
-  baseSpawnCount: 10
+  baseSpawnCount: 30
   baseSpawnInterval: 0.8
   hpMultByWave:
     serializedVersion: 2

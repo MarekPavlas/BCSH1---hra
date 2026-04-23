@@ -69,4 +69,4 @@ public class ShotgunPellet : MonoBehaviour
         eh.TakeDamage(damage);
         Destroy(gameObject);
     }
-}
+}   

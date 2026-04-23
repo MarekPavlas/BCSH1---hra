@@ -15,6 +15,7 @@ MonoBehaviour:
   id: 9
   displayName: Shotgun
   description: 
-  icon: {fileID: 21300000, guid: 6a989cb39867862469f83ed28bf59449, type: 3}
+  icon: {fileID: 21300000, guid: 0c2c86fd77a50cc438aa67b32a64fe53, type: 3}
+  rarity: 0
   maxLevel: 8
   shopPrice: 10
