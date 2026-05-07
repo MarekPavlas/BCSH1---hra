@@ -24,12 +24,12 @@ Hráč se pohybuje po vybrané mapě a snaží se přežít vlny nepřátel. Nep
 
 | # | Název | Obrázek | Popis |
 |---:|---|---|---|
-| 1 | Výběr mapy | <img src="Screenshots/map-select.png" width="350"> | Obrazovka pro výběr jedné ze tří map: Forest, Mars a Mountain. |
-| 2 | Lesní mapa | <img src="Screenshots/les-map.png" width="350"> | Ukázka prostředí lesní mapy. |
-| 3 | Mars mapa | <img src="Screenshots/mars-map.png" width="350"> | Ukázka prostředí Mars mapy. |
-| 4 | Horská mapa | <img src="Screenshots/hora-map.png" width="350"> | Ukázka prostředí horské mapy. |
-| 5 | Průběh hry | <img src="Screenshots/midgame.png" width="350"> | Gameplay během vlny nepřátel. V horní části je HUD s HP, aktuální vlnou a goldy. |
-| 6 | Shop mezi vlnami | <img src="Screenshots/shop.png" width="350"> | Obchod mezi vlnami, kde hráč nakupuje zbraně, upgrady a pasivní itemy. |
+| 1 | Výběr mapy | <img src="Hra/Screenshots/map-select.png" width="350"> | Obrazovka pro výběr jedné ze tří map: Forest, Mars a Mountain. |
+| 2 | Lesní mapa | <img src="Hra/Screenshots/les-map.png" width="350"> | Ukázka prostředí lesní mapy. |
+| 3 | Mars mapa | <img src="Hra/Screenshots/mars-map.png" width="350"> | Ukázka prostředí Mars mapy. |
+| 4 | Horská mapa | <img src="Hra/Screenshots/hora-map.png" width="350"> | Ukázka prostředí horské mapy. |
+| 5 | Průběh hry | <img src="Hra/Screenshots/midgame.png" width="350"> | Gameplay během vlny nepřátel. V horní části je HUD s HP, aktuální vlnou a goldy. |
+| 6 | Shop mezi vlnami | <img src="Hra/Screenshots/shop.png" width="350"> | Obchod mezi vlnami, kde hráč nakupuje zbraně, upgrady a pasivní itemy. |
 
 # Použité zdroje
 
