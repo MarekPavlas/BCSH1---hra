@@ -12,10 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66967024b05611c45a3004681bd6657c, type: 3}
   m_Name: WD_Laser
   m_EditorClassIdentifier: Assembly-CSharp::WeaponDefinition
-  id: 6
+  id: 2
   displayName: Laser
-  description: 
+  description: 'Damage: 9
+
+    Fire Interval: 0.2
+
+    Range: 18
+
+    Projectile
+    Speed: 0'
   icon: {fileID: 21300000, guid: e095ca83c02658845b856da6001c0d62, type: 3}
-  rarity: 0
-  maxLevel: 8
+  rarity: 3
+  maxLevel: 3
   shopPrice: 10

@@ -36,7 +36,7 @@ public class StatBlock
         get
         {
             float v = baseValue + flatAdd;
-            v *= (1f + percentAdd);
+            v *= 1f + percentAdd;
             v *= multiplier;
             return v;
         }
@@ -53,15 +53,15 @@ public class StatBlock
 public class PlayerStats : MonoBehaviour
 {
     [Header("HP")]
-    public StatBlock maxHp = new StatBlock { baseValue = 100f };
-    public float currentHP = 100f;
+    public StatBlock maxHp = new StatBlock { baseValue = 40f };
+    public float currentHP = 40f;
     public bool setMaxHpFromStartingHp = true;
 
     [Header("Regen")]
     public StatBlock regenPerSec = new StatBlock { baseValue = 0f };
 
     [Header("Movement")]
-    public StatBlock moveSpeed = new StatBlock { baseValue = 12f };
+    public StatBlock moveSpeed = new StatBlock { baseValue = 10.5f };
 
     [Header("Combat Multipliers")]
     public StatBlock damage = new StatBlock { baseValue = 1f };
@@ -78,14 +78,6 @@ public class PlayerStats : MonoBehaviour
     [Header("Crit")]
     public StatBlock critChance = new StatBlock { baseValue = 0f };
     public StatBlock critDamage = new StatBlock { baseValue = 2f };
-
-    [Header("Progression")]
-    public int currentLevel = 1;
-    public int currentXP = 0;
-    public int xpToNextLevel = 5;
-    public int totalCrystals = 0;
-
-    public event Action OnLevelUp;
 
     [Header("Debug")]
     public bool debugLogs = false;
@@ -104,10 +96,9 @@ public class PlayerStats : MonoBehaviour
             maxHp.baseValue = start;
             currentHP = start;
         }
-        else
+        else if (currentHP <= 0f)
         {
-            if (currentHP <= 0f)
-                currentHP = maxHp.Value;
+            currentHP = maxHp.Value;
         }
 
         currentHP = Mathf.Clamp(currentHP, 0f, maxHp.Value);
@@ -115,10 +106,10 @@ public class PlayerStats : MonoBehaviour
 
     void Update()
     {
-        float r = regenPerSec.Value;
-        if (r > 0f && currentHP > 0f)
+        float regen = regenPerSec.Value;
+        if (regen > 0f && currentHP > 0f)
         {
-            regenAccum += r * Time.deltaTime;
+            regenAccum += regen * Time.deltaTime;
             if (regenAccum >= 0.1f)
             {
                 Heal(regenAccum);
@@ -140,41 +131,9 @@ public class PlayerStats : MonoBehaviour
                 $"Luck {luck.Value:0.##} | " +
                 $"Crit {critChance.Value * 100f:0}% | " +
                 $"CritDmg {critDamage.Value * 100f:0}% | " +
-                $"ItemPrice {itemPrice.Value * 100f:0}% | " +
-                $"Lvl {currentLevel} XP {currentXP}/{xpToNextLevel} | Crystals {totalCrystals}"
+                $"ItemPrice {itemPrice.Value * 100f:0}%"
             );
         }
-    }
-
-    public void AddCrystal(int amount = 1)
-    {
-        if (amount <= 0) return;
-        totalCrystals += amount;
-        AddXP(amount);
-    }
-
-    public void AddXP(int amount)
-    {
-        if (amount <= 0) return;
-
-        currentXP += amount;
-
-        while (currentXP >= xpToNextLevel)
-        {
-            currentXP -= xpToNextLevel;
-            LevelUp();
-        }
-    }
-
-    void LevelUp()
-    {
-        currentLevel++;
-        xpToNextLevel = Mathf.RoundToInt(xpToNextLevel * 1.5f);
-
-        if (debugLogs)
-            Debug.Log($"[PlayerStats] LEVEL UP -> {currentLevel} | next XP: {xpToNextLevel}");
-
-        OnLevelUp?.Invoke();
     }
 
     public float Get(PlayerStatType type) => GetBlock(type).Value;

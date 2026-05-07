@@ -57,7 +57,8 @@ public class ShotgunWeapon : MonoBehaviour, IWeaponLevelApplier
         currentDamagePerPellet = Mathf.Max(0f, tuning.damage);
         currentAimRange = Mathf.Max(0.1f, tuning.range);
         currentPelletSpeed = Mathf.Max(0.1f, tuning.projectileSpeed);
-        currentPelletCount = Mathf.Max(1, tuning.projectileCount);
+
+        currentPelletCount = Mathf.Max(1, pelletCount);
 
         if (debugLogs)
         {

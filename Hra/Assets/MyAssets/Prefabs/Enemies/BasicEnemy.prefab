@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 5821475966175252426}
   - component: {fileID: 148459521076242360}
   - component: {fileID: 8941456776076454446}
-  - component: {fileID: -1236981681338598031}
   - component: {fileID: -1760328851683295251}
   - component: {fileID: 8897048147311471149}
+  - component: {fileID: -5359188080658551917}
   m_Layer: 7
   m_Name: BasicEnemy
   m_TagString: Enemy
@@ -33,7 +33,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -4.8166904, y: 2.465751, z: -2.2583785}
-  m_LocalScale: {x: 3.5895388, y: 3.5895388, z: 3.5895388}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2954517580200643938}
@@ -49,7 +49,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.45
-  m_Speed: 15
+  m_Speed: 4.5
   m_Acceleration: 120
   avoidancePriority: 50
   m_AngularSpeed: 720
@@ -73,7 +73,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c45d9980442b8a46bd1b826c0d0340d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  health: 10
+  health: 18
   currentHealth: 0
   damageMultiplier: 1
   debugLogs: 0
@@ -90,7 +90,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
   player: {fileID: 0}
-  moveSpeed: 20
+  moveSpeed: 4.5
   repathInterval: 0.2
   repathMoveThreshold: 0.25
   stopRepathWithinDistance: 0
@@ -108,11 +108,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDrop
   moneyPrefab: {fileID: 1831739412398668525, guid: 709a069ef432b2146914a8442c23137d, type: 3}
-  moneyDropChance: 0
+  moneyDropChance: 1
   minAmount: 1
-  maxAmount: 1
+  maxAmount: 3
   healthPrefab: {fileID: 3180190772059161819, guid: 0a1f943544a32fe4ab4b1fcebe6a00e5, type: 3}
-  healthDropChance: 1
+  healthDropChance: 0.3
   spawnYOffset: 2
   rayStartHeight: 5
   rayDistance: 20
@@ -121,19 +121,6 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 8
-  debugLogs: 1
---- !u!114 &-1236981681338598031
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5287917300430712643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 421e5128311c4ac4e83130b60f97d81c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyStatusController
   debugLogs: 1
 --- !u!114 &-1760328851683295251
 MonoBehaviour:
@@ -151,9 +138,9 @@ MonoBehaviour:
   playerMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  damagePerHit: 2
-  hitInterval: 0.8
-  hitRadius: 1
+  damagePerHit: 6
+  hitInterval: 1
+  hitRadius: 3
   requireLineOfSight: 0
   lineOfSightMask:
     serializedVersion: 2
@@ -181,6 +168,31 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.6
   m_Center: {x: 0, y: 0.6, z: 0}
+--- !u!114 &-5359188080658551917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5287917300430712643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf4ea55d99f93e4eb76d00d71305691, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimatorDriver
+  animator: {fileID: 2908706955011122234}
+  player: {fileID: 0}
+  health: {fileID: 5821475966175252426}
+  meleeDamage: {fileID: -1760328851683295251}
+  agent: {fileID: 1611271681539992625}
+  isMovingParam: IsMoving
+  attackParam: Attack
+  hitParam: Hit
+  deadParam: Dead
+  moveThreshold: 0.05
+  attackRangePadding: 2
+  minDamageToTriggerHit: 0.01
+  debugLogs: 0
 --- !u!1001 &2958565398596739172
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -238,6 +250,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}
+--- !u!95 &2908706955011122234 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 95457531584545886, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}
+  m_PrefabInstance: {fileID: 2958565398596739172}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2954517580200643938 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4047972025199878, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}

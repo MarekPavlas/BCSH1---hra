@@ -10,7 +10,7 @@ public class PassiveInventory : MonoBehaviour
 
     [Header("Debug")]
     public bool debugLogs = true;
-    public bool debugKeyPPrint = true; 
+    public bool debugKeyPPrint = true;
 
     private readonly Dictionary<PassiveItemDefinition, int> stacks = new();
 
@@ -74,9 +74,8 @@ public class PassiveInventory : MonoBehaviour
                 ApplyMod(m, s);
             }
         }
-
-        stats.SetCurrentHPToMax();
     }
+
 
     void ApplyMod(PassiveStatMod mod, int stacksCount)
     {
@@ -94,10 +93,6 @@ public class PassiveInventory : MonoBehaviour
                 stats.AddPercent(mod.stat, (mod.value / 100f) * stacksCount);
                 break;
 
-            case StatModMode.Multiply:
-                float mul = Mathf.Pow(v, stacksCount);
-                stats.Multiply(mod.stat, mul);
-                break;
         }
     }
 

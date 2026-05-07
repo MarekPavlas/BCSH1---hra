@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1091974b36529674aa08b65d311dbce0, type: 3}
+  m_Name: PD_EyeOfTheBeast
+  m_EditorClassIdentifier: Assembly-CSharp::PassiveItemDefinition
+  internalId: EyeOfTheBeast
+  displayName: Eye of the Beast
+  description: '+18% Range
+
+    +8% Crit Chance
+
+    +10% Damage'
+  icon: {fileID: 21300000, guid: 0a32bb4980bccc445ae658cb3a01125c, type: 3}
+  rarity: 3
+  shopPrice: 22
+  maxStacks: 1
+  mods:
+  - stat: 5
+    mode: 1
+    value: 18
+  - stat: 10
+    mode: 0
+    value: 0.08
+  - stat: 3
+    mode: 1
+    value: 10
+  specialEffects: []

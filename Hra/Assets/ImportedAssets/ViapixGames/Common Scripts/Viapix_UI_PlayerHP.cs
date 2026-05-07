@@ -1,4 +1,4 @@
-﻿using Viapix_PlayerParams;
+using Viapix_PlayerParams;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;

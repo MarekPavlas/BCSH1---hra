@@ -47,7 +47,7 @@ public class EnemyRangedAI : MonoBehaviour
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.updateRotation = false;
+        agent.updateRotation = true;
     }
 
     void OnEnable()
@@ -205,12 +205,6 @@ public class EnemyRangedAI : MonoBehaviour
 
     void Shoot()
     {
-        if (projectilePrefab == null)
-        {
-            if (debugLogs) Debug.LogWarning("[EnemyRangedAI] projectilePrefab is NULL (nepřiřazeno v inspectoru)");
-            return;
-        }
-
         Vector3 origin = shootPoint.position;
 
         Vector3 target = player.position + Vector3.up * aimHeightOffset;

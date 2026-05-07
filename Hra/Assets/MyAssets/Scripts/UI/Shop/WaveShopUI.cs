@@ -186,6 +186,59 @@ public class WaveShopUI : MonoBehaviour
             currencyText.text = string.Format(currencyFormat, wallet.GetCurrentAmount());
     }
 
+    int GetScaledShopPrice(int basePrice)
+    {
+        float scaled = playerStats != null ? playerStats.ScalePrice(basePrice) : basePrice;
+        return Mathf.Max(0, Mathf.RoundToInt(scaled));
+    }
+
+    int GetWeaponShopPrice(WeaponDefinition def)
+    {
+        if (def == null)
+            return 0;
+
+        if (playerWeapons == null || !playerWeapons.HasWeapon(def.id))
+            return GetScaledShopPrice(def.shopPrice);
+
+        int currentLevel = playerWeapons.GetLevel(def.id);
+        WeaponUpgradeConfig cfg = playerWeapons.GetUpgradeConfig(def.id);
+
+        if (cfg == null)
+            return GetScaledShopPrice(def.shopPrice);
+
+        WeaponUpgradeStep step = cfg.GetUpgradeStepForCurrentLevel(currentLevel);
+        return GetScaledShopPrice(step.price);
+    }
+
+    string GetWeaponDescription(WeaponDefinition def, bool owned, int currentLevel)
+    {
+        if (def == null)
+            return "-";
+
+        if (!owned)
+            return GetDescription(def.description);
+
+        WeaponUpgradeConfig cfg = playerWeapons.GetUpgradeConfig(def.id);
+        if (cfg == null)
+            return "-";
+
+        int nextLevel = currentLevel + 1;
+
+        WeaponLevelTuning next = cfg.GetTuningForLevel(nextLevel);
+        WeaponLevelTuning current = cfg.GetTuningForLevel(currentLevel);
+
+        return
+            $"Damage: {current.damage} -> {next.damage}\n" +
+            $"Fire interval: {current.fireInterval} -> {next.fireInterval}\n" +
+            $"Range: {current.range} -> {next.range}\n" +
+            $"Projectile speed: {current.projectileSpeed} -> {next.projectileSpeed}";
+    }
+
+    int GetPassiveShopPrice(PassiveItemDefinition def)
+    {
+        return def == null ? 0 : GetScaledShopPrice(def.shopPrice);
+    }
+
     void GenerateAndBindOffers()
     {
         currentOffers = BuildOffers(offersCount, allWeapons, allPassives);
@@ -219,20 +272,20 @@ public class WaveShopUI : MonoBehaviour
             if (off.isPassive)
             {
                 PassiveItemDefinition def = off.passive;
+                int finalPrice = GetPassiveShopPrice(def);
                 bool canBuy = def != null && passiveInventory != null && passiveInventory.CanAdd(def);
-                bool canAfford = def != null && wallet != null && wallet.CanAfford(def.shopPrice);
+                bool canAfford = def != null && wallet != null && wallet.CanAfford(finalPrice);
 
                 cards[i].Bind(
-    def.icon,
-    def.displayName,
-    GetDescription(def != null ? def.description : null),
-    def.shopPrice,
-    canAfford,
-    canBuy,
-    def.rarity,
-    () => BuyPassive(def, def.shopPrice, slotIndex)
-);
-
+                    def.icon,
+                    def.displayName,
+                    GetDescription(def != null ? def.description : null),
+                    finalPrice,
+                    canAfford,
+                    canBuy,
+                    def.rarity,
+                    () => BuyPassive(def, slotIndex)
+                );
             }
             else
             {
@@ -240,22 +293,22 @@ public class WaveShopUI : MonoBehaviour
                 bool owned = def != null && playerWeapons.HasWeapon(def.id);
                 int currentLevel = def != null ? playerWeapons.GetLevel(def.id) : 0;
                 int maxLevel = def != null ? playerWeapons.GetMaxLevel(def.id) : 1;
+                int finalPrice = GetWeaponShopPrice(def);
 
                 bool canUnlockNewWeapon = playerWeapons != null && playerWeapons.CanUnlockMoreWeapons();
                 bool canBuyMore = def != null && ((owned && currentLevel < maxLevel) || (!owned && canUnlockNewWeapon));
-                bool canAfford = def != null && wallet != null && wallet.CanAfford(def.shopPrice);
+                bool canAfford = def != null && wallet != null && wallet.CanAfford(finalPrice);
 
                 cards[i].Bind(
     def.icon,
     GetWeaponOfferLabel(def, owned, currentLevel, maxLevel),
-    GetDescription(def != null ? def.description : null),
-    def.shopPrice,
+    GetWeaponDescription(def, owned, currentLevel),
+    finalPrice,
     canAfford,
     canBuyMore,
     def.rarity,
-    () => BuyWeapon(def, def.shopPrice, slotIndex)
+    () => BuyWeapon(def, slotIndex)
 );
-
             }
         }
     }
@@ -314,7 +367,7 @@ public class WaveShopUI : MonoBehaviour
             rerollButton.interactable = panelRoot != null && panelRoot.activeSelf && wallet != null && wallet.CanAfford(price);
     }
 
-    void BuyWeapon(WeaponDefinition def, int price, int slotIndex)
+    void BuyWeapon(WeaponDefinition def, int slotIndex)
     {
         if (def == null || playerWeapons == null || wallet == null)
             return;
@@ -327,6 +380,8 @@ public class WaveShopUI : MonoBehaviour
 
         if (owned && playerWeapons.GetLevel(def.id) >= maxLevel)
             return;
+
+        int price = GetWeaponShopPrice(def);
 
         if (!wallet.TrySpend(price))
             return;
@@ -343,16 +398,18 @@ public class WaveShopUI : MonoBehaviour
         RefreshShopDisplay();
 
         if (showDebugLogs)
-            Debug.Log($"[Shop] Purchased {def.displayName}");
+            Debug.Log($"[Shop] Purchased {def.displayName} for {price}");
     }
 
-    void BuyPassive(PassiveItemDefinition def, int price, int slotIndex)
+    void BuyPassive(PassiveItemDefinition def, int slotIndex)
     {
         if (def == null || passiveInventory == null || wallet == null)
             return;
 
         if (!passiveInventory.CanAdd(def))
             return;
+
+        int price = GetPassiveShopPrice(def);
 
         if (!wallet.TrySpend(price))
             return;
@@ -363,7 +420,7 @@ public class WaveShopUI : MonoBehaviour
         RefreshShopDisplay();
 
         if (showDebugLogs)
-            Debug.Log($"[Shop] Purchased passive {def.displayName}");
+            Debug.Log($"[Shop] Purchased passive {def.displayName} for {price}");
     }
 
     void ReplaceOfferAt(int slotIndex)

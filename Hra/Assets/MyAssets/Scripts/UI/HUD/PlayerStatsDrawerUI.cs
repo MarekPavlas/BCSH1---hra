@@ -170,22 +170,31 @@ public class PlayerStatsDrawerUI : MonoBehaviour
     string BuildStatsText()
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"HP: {stats.currentHP:0}/{stats.maxHp.Value:0}");
-        sb.AppendLine($"Level: {stats.currentLevel}");
-        sb.AppendLine($"XP: {stats.currentXP}/{stats.xpToNextLevel}");
-        sb.AppendLine($"Damage: {stats.damage.Value:0.00}");
-        sb.AppendLine($"Attack Speed: {stats.attackSpeed.Value:0.00}");
-        sb.AppendLine($"Range: {stats.range.Value:0.00}");
-        sb.AppendLine($"Move Speed: {stats.moveSpeed.Value:0.00}");
-        sb.AppendLine($"Projectile Speed: {stats.projectileSpeed.Value:0.00}");
-        sb.AppendLine($"Pickup Range: {stats.pickupRange.Value:0.00}");
-        sb.AppendLine($"Money Gain: {stats.moneyGain.Value:0.00}");
-        sb.AppendLine($"Luck: {stats.luck.Value:0.00}");
-        sb.AppendLine($"Crit Chance: {stats.critChance.Value:0.00}");
-        sb.AppendLine($"Crit Damage: {stats.critDamage.Value:0.00}");
-        sb.AppendLine($"Item Price: {stats.itemPrice.Value:0.00}");
+
+        sb.AppendLine($"HP: {stats.currentHP:0.#}/{stats.maxHp.Value:0.#}");
+        sb.AppendLine();
+
+        sb.AppendLine($"Max HP: {stats.maxHp.Value:0.#}");
+        sb.AppendLine($"Regen: {stats.regenPerSec.Value:0.##}/s");
+        sb.AppendLine($"Move Speed: {stats.moveSpeed.Value:0.##}");
+        sb.AppendLine($"Pickup Range: {stats.pickupRange.Value:0.##}");
+        sb.AppendLine($"Luck: {stats.luck.Value:0.##}");
+        sb.AppendLine();
+
+        sb.AppendLine($"Damage: {FormatPercent(stats.damage.Value)}");
+        sb.AppendLine($"Attack Speed: {FormatPercent(stats.attackSpeed.Value)}");
+        sb.AppendLine($"Range: {FormatPercent(stats.range.Value)}");
+        sb.AppendLine($"Projectile Speed: {FormatPercent(stats.projectileSpeed.Value)}");
+        sb.AppendLine($"Money Gain: {FormatPercent(stats.moneyGain.Value)}");
+        sb.AppendLine($"Crit Chance: {FormatPercent(stats.critChance.Value)}");
+        sb.AppendLine($"Crit Damage: {FormatPercent(stats.critDamage.Value)}");
+        sb.AppendLine($"Item Price: {FormatPercent(stats.itemPrice.Value)}");
+
         return sb.ToString();
     }
 
-
+    string FormatPercent(float value)
+    {
+        return $"{value * 100f:0.#}%";
+    }
 }

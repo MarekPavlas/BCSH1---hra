@@ -52,14 +52,18 @@ public class EnemyHealth : MonoBehaviour
             lastBonusExtraPercent = 0f;
         }
 
-        float mult = Mathf.Max(0f, damageMultiplier);
-        float finalDamage = damage * mult;
+        float finalDamage = damage * Mathf.Max(0f, damageMultiplier);
 
         float before = currentHealth;
         currentHealth -= finalDamage;
 
         if (debugLogs)
-            Debug.Log($"[EnemyHealth] {name} dmg={finalDamage:0.00} HP {before:0.00}->{currentHealth:0.00} source={source}");
+        {
+            Debug.Log(
+                $"[EnemyHealth] {name} dmg={finalDamage:0.00} " +
+                $"HP {before:0.00}->{currentHealth:0.00}"
+            );
+        }
 
         if (currentHealth <= 0f)
             Die();
@@ -71,6 +75,9 @@ public class EnemyHealth : MonoBehaviour
             return;
 
         isDead = true;
+
+        if (SaveStatsManager.Instance != null)
+            SaveStatsManager.Instance.AddEnemyKill();
 
         EnemyDrop drop = GetComponent<EnemyDrop>();
         if (drop == null)

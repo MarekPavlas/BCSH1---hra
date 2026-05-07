@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class WaveEnemySpawner : MonoBehaviour
 {
@@ -174,9 +175,33 @@ public class WaveEnemySpawner : MonoBehaviour
         }
         else
         {
-            float r = Random.Range(minRadius, maxRadius);
-            Vector2 circle = Random.insideUnitCircle.normalized * r;
-            pos = new Vector3(player.position.x + circle.x, player.position.y, player.position.z + circle.y);
+            bool found = false;
+            pos = Vector3.zero;
+
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                float r = Random.Range(minRadius, maxRadius);
+                Vector2 circle = Random.insideUnitCircle.normalized * r;
+                Vector3 candidate = new Vector3(
+                    player.position.x + circle.x,
+                    player.position.y,
+                    player.position.z + circle.y
+                );
+
+                if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 3f, NavMesh.AllAreas))
+                {
+                    pos = hit.position;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                if (debugLogs)
+                    Debug.LogWarning("[WaveEnemySpawner] Nepodařilo se najít NavMesh pozici pro spawn.");
+                return null;
+            }
         }
 
         GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];

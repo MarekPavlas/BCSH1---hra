@@ -3,17 +3,10 @@
 public enum WeaponId
 {
     Bullet,
-    Lightning,
-    Boomerang,
-    AOE,
-    Rubber,
     Piercing,
     Laser,
-    OrbitingBlades,
-    RocketNapalm,
     Shotgun,
     AK47,
-    MoneyStack
 }
 
 [CreateAssetMenu(menuName = "Game/Weapon Definition")]

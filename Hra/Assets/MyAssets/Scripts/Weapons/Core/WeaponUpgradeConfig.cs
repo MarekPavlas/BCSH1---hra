@@ -18,17 +18,13 @@ public class WeaponUpgradeConfig : ScriptableObject
     [Header("Upgrade to Level 2")]
     public WeaponUpgradeStep upgradeToLevel2 = new WeaponUpgradeStep
     {
-        price = 100,
-        successChance = 10f,
-        failBonus = 10f
+        price = 100
     };
 
     [Header("Upgrade to Level 3")]
     public WeaponUpgradeStep upgradeToLevel3 = new WeaponUpgradeStep
     {
-        price = 250,
-        successChance = 10f,
-        failBonus = 10f
+        price = 250
     };
 
     public WeaponLevelTuning GetTuningForLevel(int level)
@@ -53,15 +49,10 @@ public struct WeaponLevelTuning
     public float fireInterval;
     public float range;
     public float projectileSpeed;
-    public float aoeRadius;
-    public int projectileCount;
-    public int maxSimultaneous;
 }
 
 [Serializable]
 public struct WeaponUpgradeStep
 {
     public int price;
-    [Range(0f, 100f)] public float successChance;      
-    [Range(0f, 100f)] public float failBonus;           
 }

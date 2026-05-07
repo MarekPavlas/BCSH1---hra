@@ -50,7 +50,8 @@ public class AutoShooter : MonoBehaviour, IWeaponLevelApplier
         currentDamage = Mathf.Max(0f, tuning.damage);
         currentRange = Mathf.Max(0.1f, tuning.range);
         currentBulletSpeed = Mathf.Max(0.1f, tuning.projectileSpeed);
-        currentProjectiles = Mathf.Max(1, tuning.projectileCount);
+
+        currentProjectiles = Mathf.Max(1, baseProjectiles);
 
         if (debugLogs)
         {

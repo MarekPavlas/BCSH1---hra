@@ -6,7 +6,6 @@ public class WaveManager : MonoBehaviour
     [Header("Wave Config")]
     [Min(1)] public int totalWaves = 20;
     [Min(1f)] public float waveDuration = 30f;
-    [Min(0f)] public float intermissionDuration = 5f;
 
     [Header("Test Mode")]
     public bool testModeNoShop = false;
@@ -36,44 +35,27 @@ public class WaveManager : MonoBehaviour
 
     float debugNextTime;
 
-    void Start() => StartNextWave();
+    void Start()
+    {
+        StartNextWave();
+    }
 
     void Update()
     {
-        if (IsWaveRunning)
+        if (!IsWaveRunning)
+            return;
+
+        WaveTimeLeft -= Time.deltaTime;
+
+        if (debugLogs && Time.time >= debugNextTime)
         {
-            WaveTimeLeft -= Time.deltaTime;
-
-            if (debugLogs && Time.time >= debugNextTime)
-            {
-                debugNextTime = Time.time + debugEverySeconds;
-                float progress = 1f - Mathf.Clamp01(WaveTimeLeft / waveDuration);
-                Debug.Log($"[WAVE] {CurrentWave}/{totalWaves} running | left={WaveTimeLeft:0.0}s | progress={(progress * 100f):0}%");
-            }
-
-            if (WaveTimeLeft <= 0f)
-                EndWave();
+            debugNextTime = Time.time + debugEverySeconds;
+            float progress = 1f - Mathf.Clamp01(WaveTimeLeft / waveDuration);
+            Debug.Log($"[WAVE] {CurrentWave}/{totalWaves} running | left={WaveTimeLeft:0.0}s | progress={(progress * 100f):0}%");
         }
-        else if (IsIntermission)
-        {
-            if (testModeNoShop && testSkipIntermission)
-            {
-                if (debugLogs) Debug.Log($"[WAVE] TEST MODE: skipping intermission -> starting wave {CurrentWave + 1}");
-                StartNextWave();
-                return;
-            }
 
-            WaveTimeLeft -= Time.deltaTime;
-
-            if (debugLogs && Time.time >= debugNextTime)
-            {
-                debugNextTime = Time.time + debugEverySeconds;
-                Debug.Log($"[WAVE] Intermission before wave {CurrentWave + 1} | left={WaveTimeLeft:0.0}s");
-            }
-
-            if (WaveTimeLeft <= 0f)
-                StartNextWave();
-        }
+        if (WaveTimeLeft <= 0f)
+            EndWave();
     }
 
     void StartNextWave()
@@ -84,7 +66,11 @@ public class WaveManager : MonoBehaviour
         if (CurrentWave > totalWaves)
         {
             IsWaveRunning = false;
-            if (debugLogs) Debug.Log("[WAVE] All waves completed!");
+            WaveTimeLeft = 0f;
+
+            if (debugLogs)
+                Debug.Log("[WAVE] All waves completed!");
+
             OnAllWavesCompleted?.Invoke();
             return;
         }
@@ -93,58 +79,84 @@ public class WaveManager : MonoBehaviour
         WaveTimeLeft = waveDuration;
         debugNextTime = Time.time + debugEverySeconds;
 
-        if (debugLogs) Debug.Log($"[WAVE] START wave {CurrentWave}/{totalWaves}");
+        if (debugLogs)
+            Debug.Log($"[WAVE] START wave {CurrentWave}/{totalWaves}");
+
         OnWaveStarted?.Invoke(CurrentWave);
     }
 
     void EndWave()
     {
         IsWaveRunning = false;
+        WaveTimeLeft = 0f;
 
-        if (debugLogs) Debug.Log($"[WAVE] END wave {CurrentWave}/{totalWaves}");
+        if (debugLogs)
+            Debug.Log($"[WAVE] END wave {CurrentWave}/{totalWaves}");
 
         if (killEnemiesOnWaveEnd)
         {
             int killed = KillAllEnemiesByEnemyHealth();
-            if (debugLogs) Debug.Log($"[WAVE] Killed enemies = {killed}");
+            if (debugLogs)
+                Debug.Log($"[WAVE] Killed enemies = {killed}");
         }
 
         if (despawnMoneyOnWaveEnd)
         {
             int removed = DespawnAllMoneyPickups();
-            if (debugLogs) Debug.Log($"[WAVE] Despawned MoneyPickup = {removed}");
+            if (debugLogs)
+                Debug.Log($"[WAVE] Despawned MoneyPickup = {removed}");
         }
 
         OnWaveEnded?.Invoke(CurrentWave);
 
         if (CurrentWave >= totalWaves)
         {
-            if (debugLogs) Debug.Log("[WAVE] All waves completed!");
+            if (debugLogs)
+                Debug.Log("[WAVE] All waves completed!");
+
             OnAllWavesCompleted?.Invoke();
             return;
         }
 
+        if (testModeNoShop || testSkipIntermission)
+        {
+            if (debugLogs)
+                Debug.Log($"[WAVE] Intermission skipped -> starting wave {CurrentWave + 1}");
+
+            StartNextWave();
+            return;
+        }
+
         IsIntermission = true;
-        WaveTimeLeft = intermissionDuration;
-        debugNextTime = Time.time + debugEverySeconds;
+
+        if (debugLogs)
+            Debug.Log($"[WAVE] Intermission started before wave {CurrentWave + 1} (waiting for StartNextWaveNow)");
 
         OnIntermissionStarted?.Invoke(CurrentWave + 1);
     }
 
     public void StartNextWaveNow()
     {
-        if (IsWaveRunning) return;
-        if (!IsIntermission) return;
+        if (IsWaveRunning)
+            return;
+
+        if (!IsIntermission)
+            return;
 
         IsIntermission = false;
         WaveTimeLeft = 0f;
+
+        if (debugLogs)
+            Debug.Log($"[WAVE] Manual continue -> starting wave {CurrentWave + 1}");
+
         StartNextWave();
     }
 
     [ContextMenu("Force End Wave")]
     public void ForceEndWave()
     {
-        if (IsWaveRunning) WaveTimeLeft = 0.01f;
+        if (IsWaveRunning)
+            WaveTimeLeft = 0.01f;
     }
 
     int KillAllEnemiesByEnemyHealth()
@@ -154,12 +166,14 @@ public class WaveManager : MonoBehaviour
 
         foreach (var eh in enemies)
         {
-            if (eh == null) continue;
+            if (eh == null)
+                continue;
 
             if (suppressDropsOnWaveEndKill)
             {
                 var drop = eh.GetComponent<EnemyDrop>();
-                if (drop != null) drop.SuppressNextDrop();
+                if (drop != null)
+                    drop.SuppressNextDrop();
             }
 
             eh.TakeDamage(killDamage);
@@ -176,7 +190,9 @@ public class WaveManager : MonoBehaviour
 
         foreach (var m in money)
         {
-            if (m == null) continue;
+            if (m == null)
+                continue;
+
             Destroy(m.gameObject);
             removed++;
         }

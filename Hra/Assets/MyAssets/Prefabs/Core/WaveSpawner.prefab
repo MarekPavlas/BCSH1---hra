@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &57694413508239333
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3124194722064636578}
+  - component: {fileID: 7943771107347417710}
+  - component: {fileID: 552470585643817551}
+  m_Layer: 0
+  m_Name: WaveSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3124194722064636578
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57694413508239333}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 479.94644, y: 15.38953, z: 416.26715}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7943771107347417710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57694413508239333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb5541148839c28489d6fcdcdd5fca78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaveEnemySpawner
+  waveManager: {fileID: 552470585643817551}
+  scaling: {fileID: 11400000, guid: a15dc5d8699f34541a99c3b69d5456c6, type: 2}
+  player: {fileID: 0}
+  enemyPrefabs:
+  - {fileID: 5287917300430712643, guid: a7bb8aaec9e711f429fa3faa57fe3223, type: 3}
+  - {fileID: 2491278796301518221, guid: a760b394015d3a240baee20fef460e34, type: 3}
+  - {fileID: 5287917300430712643, guid: 41526348b1d31ec4c98c0687bbc9c44f, type: 3}
+  spawnPoints: []
+  useSpawnPointsIfAvailable: 0
+  minRadius: 25
+  maxRadius: 40
+  maxAlive: 12
+  infiniteSpawnsDuringWave: 1
+  debugLogs: 1
+  drawSpawnRings: 1
+  drawSpawnPoints: 1
+  gizmoY: 0.05
+--- !u!114 &552470585643817551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57694413508239333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecb59348a438d6e4092d8862dd256c3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
+  totalWaves: 10
+  waveDuration: 30
+  testModeNoShop: 0
+  testSkipIntermission: 0
+  killEnemiesOnWaveEnd: 1
+  killDamage: 999999
+  suppressDropsOnWaveEndKill: 1
+  despawnMoneyOnWaveEnd: 1
+  debugLogs: 1
+  debugEverySeconds: 1

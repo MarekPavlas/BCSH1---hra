@@ -12,29 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 109be33111f3bcd48a8ed6c0026e3e6d, type: 3}
   m_Name: ShotgunUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::WeaponUpgradeConfig
-  id: 0
+  id: 3
+  displayName: 
+  icon: {fileID: 21300000, guid: 0c2c86fd77a50cc438aa67b32a64fe53, type: 3}
   maxLevel: 3
   level1:
-    damageMult: 1
-    fireIntervalMult: 1
-    rangeMult: 1
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 0
-    maxSimultaneousOverride: -1
+    damage: 3
+    fireInterval: 1.2
+    range: 15
+    projectileSpeed: 40
   level2:
-    damageMult: 1.25
-    fireIntervalMult: 0.9
-    rangeMult: 1.1
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 0
-    maxSimultaneousOverride: -1
+    damage: 3.5
+    fireInterval: 1
+    range: 16
+    projectileSpeed: 42
   level3:
-    damageMult: 1.6
-    fireIntervalMult: 0.75
-    rangeMult: 1.2
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 1
-    maxSimultaneousOverride: -1
+    damage: 4
+    fireInterval: 0.9
+    range: 18
+    projectileSpeed: 44
+  upgradeToLevel2:
+    price: 45
+  upgradeToLevel3:
+    price: 75

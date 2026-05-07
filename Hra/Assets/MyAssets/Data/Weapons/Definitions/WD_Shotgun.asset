@@ -12,10 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66967024b05611c45a3004681bd6657c, type: 3}
   m_Name: WD_Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponDefinition
-  id: 9
+  id: 3
   displayName: Shotgun
-  description: 
+  description: 'Damage: 3
+
+    Fire Interval: 1.2
+
+    Range: 15
+
+    Projectile
+    Speed: 40'
   icon: {fileID: 21300000, guid: 0c2c86fd77a50cc438aa67b32a64fe53, type: 3}
-  rarity: 0
-  maxLevel: 8
+  rarity: 1
+  maxLevel: 3
   shopPrice: 10

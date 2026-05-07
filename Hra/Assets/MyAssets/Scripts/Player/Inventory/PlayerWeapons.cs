@@ -47,6 +47,12 @@ public class PlayerWeapons : MonoBehaviour
 
     public event Action<WeaponId, int> OnWeaponLevelChanged;
 
+    public WeaponUpgradeConfig GetUpgradeConfig(WeaponId id)
+    {
+        cfgById.TryGetValue(id, out var cfg);
+        return cfg;
+    }
+
     void Awake()
     {
         foreach (var def in weaponDefinitions)
@@ -69,7 +75,6 @@ public class PlayerWeapons : MonoBehaviour
                 Unlock(id, false);
         }
     }
-
     void InitTestMode()
     {
         levels.Clear();
@@ -92,9 +97,7 @@ public class PlayerWeapons : MonoBehaviour
         Debug.Log($"[TEST MODE] Aktivni zbran: {testWeapon} (Level {lvl})");
         OnWeaponLevelChanged?.Invoke(testWeapon, lvl);
     }
-
     public bool HasWeapon(WeaponId id) => levels.ContainsKey(id);
-
     public int GetLevel(WeaponId id) =>
         levels.TryGetValue(id, out var lvl) ? lvl : 0;
 

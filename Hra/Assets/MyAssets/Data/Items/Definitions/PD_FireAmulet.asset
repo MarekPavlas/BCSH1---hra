@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1091974b36529674aa08b65d311dbce0, type: 3}
+  m_Name: PD_FireAmulet
+  m_EditorClassIdentifier: Assembly-CSharp::PassiveItemDefinition
+  internalId: FireAmulet
+  displayName: Fire Amulet
+  description: '+14% Damage
+
+    +12% Projectile Speed'
+  icon: {fileID: 21300000, guid: 332fb7109d77e874087f44e6fc26817d, type: 3}
+  rarity: 2
+  shopPrice: 16
+  maxStacks: 2
+  mods:
+  - stat: 3
+    mode: 1
+    value: 14
+  - stat: 6
+    mode: 1
+    value: 12
+  specialEffects: []

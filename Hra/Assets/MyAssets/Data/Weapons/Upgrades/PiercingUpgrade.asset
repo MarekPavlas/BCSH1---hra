@@ -12,29 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 109be33111f3bcd48a8ed6c0026e3e6d, type: 3}
   m_Name: PiercingUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::WeaponUpgradeConfig
-  id: 0
+  id: 1
+  displayName: 
+  icon: {fileID: 21300000, guid: c38f571472b99254e93cfa582f2bf0c9, type: 3}
   maxLevel: 3
   level1:
-    damageMult: 1
-    fireIntervalMult: 1
-    rangeMult: 1
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 0
-    maxSimultaneousOverride: -1
+    damage: 7
+    fireInterval: 1
+    range: 22
+    projectileSpeed: 24
   level2:
-    damageMult: 1.25
-    fireIntervalMult: 0.9
-    rangeMult: 1.1
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 0
-    maxSimultaneousOverride: -1
+    damage: 9
+    fireInterval: 0.9
+    range: 24
+    projectileSpeed: 25
   level3:
-    damageMult: 1.6
-    fireIntervalMult: 0.75
-    rangeMult: 1.2
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 1
-    maxSimultaneousOverride: -1
+    damage: 12
+    fireInterval: 0.8
+    range: 26
+    projectileSpeed: 27
+  upgradeToLevel2:
+    price: 40
+  upgradeToLevel3:
+    price: 65

@@ -47,12 +47,6 @@ public class EnemyDrop : MonoBehaviour
 
     void TryDropMoney(bool killedByStackOfMoney, float bonusChance, float bonusExtraPercent)
     {
-        if (moneyPrefab == null)
-        {
-            if (debugLogs)
-                Debug.LogWarning($"[EnemyDrop] moneyPrefab is NULL on {name}");
-            return;
-        }
 
         if (moneyDropChance <= 0f)
             return;
@@ -66,9 +60,6 @@ public class EnemyDrop : MonoBehaviour
         {
             float mult = 1f + Mathf.Max(0f, bonusExtraPercent);
             int boosted = Mathf.Max(amount + 1, Mathf.RoundToInt(amount * mult));
-
-            if (debugLogs)
-                Debug.Log($"[EnemyDrop] BONUS! amount {amount} -> {boosted}");
 
             amount = boosted;
         }

@@ -12,10 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66967024b05611c45a3004681bd6657c, type: 3}
   m_Name: WD_AK47
   m_EditorClassIdentifier: Assembly-CSharp::WeaponDefinition
-  id: 10
+  id: 4
   displayName: AK47
-  description: 
+  description: 'Damage: 5
+
+    Fire Interval: 0.12
+
+    Range: 25
+
+    Projectile
+    Speed: 26'
   icon: {fileID: 21300000, guid: 0517a11047e1d744894a820ddae82611, type: 3}
-  rarity: 0
-  maxLevel: 8
+  rarity: 2
+  maxLevel: 3
   shopPrice: 10

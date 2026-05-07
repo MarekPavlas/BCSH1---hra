@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1091974b36529674aa08b65d311dbce0, type: 3}
+  m_Name: PD_Cigarette
+  m_EditorClassIdentifier: Assembly-CSharp::PassiveItemDefinition
+  internalId: 'Cigarette '
+  displayName: 'Cigarette '
+  description: '+10% Attack Speed
+
+    -4 Max HP'
+  icon: {fileID: 21300000, guid: e153b904e0dd81c4782245355076b68a, type: 3}
+  rarity: 0
+  shopPrice: 8
+  maxStacks: 2
+  mods:
+  - stat: 4
+    mode: 1
+    value: 10
+  - stat: 0
+    mode: 0
+    value: -4
+  specialEffects: []

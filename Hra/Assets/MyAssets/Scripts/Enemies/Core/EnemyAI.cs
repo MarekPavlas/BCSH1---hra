@@ -88,8 +88,6 @@ public class EnemyAI : MonoBehaviour
             lastTargetPos = ppos;
             agent.SetDestination(ppos);
 
-            if (debugLogs)
-                Debug.Log($"[EnemyAI] {name} repath -> target moved (thr={thr:0.00})");
         }
     }
 
@@ -98,8 +96,6 @@ public class EnemyAI : MonoBehaviour
         moveSpeed = Mathf.Max(0.1f, moveSpeed);
         agent.speed = moveSpeed;
 
-        if (debugLogs)
-            Debug.Log($"[EnemyAI] {name} speed set to {agent.speed:0.00}");
     }
 
     public void SetMoveSpeed(float newSpeed)

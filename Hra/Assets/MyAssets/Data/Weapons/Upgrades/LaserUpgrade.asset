@@ -12,29 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 109be33111f3bcd48a8ed6c0026e3e6d, type: 3}
   m_Name: LaserUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::WeaponUpgradeConfig
-  id: 0
+  id: 2
+  displayName: 
+  icon: {fileID: 21300000, guid: e095ca83c02658845b856da6001c0d62, type: 3}
   maxLevel: 3
   level1:
-    damageMult: 1
-    fireIntervalMult: 1
-    rangeMult: 1
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 0
-    maxSimultaneousOverride: -1
+    damage: 6
+    fireInterval: 0.2
+    range: 18
+    projectileSpeed: 0
   level2:
-    damageMult: 1.25
-    fireIntervalMult: 0.9
-    rangeMult: 1.1
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 0
-    maxSimultaneousOverride: -1
+    damage: 8
+    fireInterval: 0.18
+    range: 20
+    projectileSpeed: 0
   level3:
-    damageMult: 1.6
-    fireIntervalMult: 0.75
-    rangeMult: 1.2
-    projectileSpeedMult: 1
-    aoeRadiusMult: 1
-    projectileCountBonus: 1
-    maxSimultaneousOverride: -1
+    damage: 10
+    fireInterval: 0.16
+    range: 22
+    projectileSpeed: 0
+  upgradeToLevel2:
+    price: 50
+  upgradeToLevel3:
+    price: 80

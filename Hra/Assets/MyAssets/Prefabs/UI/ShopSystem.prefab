@@ -1,0 +1,145 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6482196307012239779
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6305302571940773767}
+  - component: {fileID: 3746124601870023423}
+  - component: {fileID: 1331419805406919757}
+  m_Layer: 0
+  m_Name: ShopSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &6305302571940773767
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6482196307012239779}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 491.63092, y: -0.00001, z: 928.0437}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3746124601870023423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6482196307012239779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64b2ea31e1602334b89b9efa1beef8c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaveShopUI
+  waveManager: {fileID: 0}
+  wallet: {fileID: 0}
+  playerWeapons: {fileID: 0}
+  passiveInventory: {fileID: 1331419805406919757}
+  weaponInventoryUI: {fileID: 0}
+  playerStats: {fileID: 0}
+  panelRoot: {fileID: 0}
+  cards:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  continueButton: {fileID: 0}
+  currencyText: {fileID: 0}
+  currencyFormat: 'Gold: {0}'
+  showDebugLogs: 1
+  rerollButton: {fileID: 0}
+  rerollPriceText: {fileID: 0}
+  rerollPriceFormat: '{0}'
+  baseRerollPrice: 15
+  rerollPriceIncreasePercent: 25
+  allWeapons:
+  - {fileID: 11400000, guid: 6ebd9507c620c564389c7216d63e4ac0, type: 2}
+  - {fileID: 11400000, guid: 56a8d330e9ec92b45b3c51aaa2a54682, type: 2}
+  - {fileID: 11400000, guid: 6e08e5cdfd0edaa40bad40c27a367d60, type: 2}
+  - {fileID: 11400000, guid: d6fb50104d1a6654cbb9ae27464594e6, type: 2}
+  - {fileID: 11400000, guid: ed24b2d9cb5a2224eae3e64ab31c728e, type: 2}
+  allPassives:
+  - {fileID: 11400000, guid: 5b55b1de47b8c2f438de393dd6687e12, type: 2}
+  - {fileID: 11400000, guid: 526eaadbcd1815b448b13e5ad44a7f5b, type: 2}
+  - {fileID: 11400000, guid: b4f5b1e3d9c80e249a8cb8966e866de9, type: 2}
+  - {fileID: 11400000, guid: 0b59cd85096453c428b22e4569d45ac5, type: 2}
+  - {fileID: 11400000, guid: fb803822508109c41a55bfdcdd7c32e9, type: 2}
+  - {fileID: 11400000, guid: 0e11c5b0d4552d347889720eda47fb02, type: 2}
+  - {fileID: 11400000, guid: ee701b54bfe3b9b4da626556dabc146b, type: 2}
+  - {fileID: 11400000, guid: 88e07bffe643b2e42bba952d31f81f21, type: 2}
+  - {fileID: 11400000, guid: 84c70089a7e05334f80634ca1ec83762, type: 2}
+  - {fileID: 11400000, guid: 63c518ea36694184e829caedcfea42d1, type: 2}
+  - {fileID: 11400000, guid: aa220842b0c58a043ae9e8ec970e321c, type: 2}
+  - {fileID: 11400000, guid: 7d7bac95f7545374da62985114d6b0c8, type: 2}
+  - {fileID: 11400000, guid: 7ea2170558edccf40a6d78d7c4de202a, type: 2}
+  - {fileID: 11400000, guid: 36806e7f76b914e4c8aaed0ce8887e14, type: 2}
+  - {fileID: 11400000, guid: c7e03c57d6c0f5e44bbf233262776faf, type: 2}
+  - {fileID: 11400000, guid: 481785ef333a8444e94b94329954be70, type: 2}
+  - {fileID: 11400000, guid: 6249b095eb5758e4fbc47667d0340673, type: 2}
+  - {fileID: 11400000, guid: 498fc8f1de399dd42a85e4dfe75e8a99, type: 2}
+  - {fileID: 11400000, guid: 145a82aae56c49e4ca966b1e9b7a7253, type: 2}
+  - {fileID: 11400000, guid: 8419f515746466446918276b9958ddd4, type: 2}
+  - {fileID: 11400000, guid: 0a8a6f37846aa4f438b0a9cee3f70580, type: 2}
+  - {fileID: 11400000, guid: 915321ebe9ae95a4ba10eaa46673df1b, type: 2}
+  - {fileID: 11400000, guid: 12d0f37711c32ab45aa561b3f13243dd, type: 2}
+  - {fileID: 11400000, guid: abf13d0a8a0aa7749b53c3f88264f6cc, type: 2}
+  - {fileID: 11400000, guid: c6f6c2e1aac8cd74993506a04e6a8edf, type: 2}
+  - {fileID: 11400000, guid: 22c0c04f5c0ba3c4ba29260dc38abe1b, type: 2}
+  - {fileID: 11400000, guid: 4525ba3df18f48848a988116aa59b5d3, type: 2}
+  - {fileID: 11400000, guid: 936a01b5a1a946d47a64c397aec8cbea, type: 2}
+  - {fileID: 11400000, guid: 5d1834b095dc85c4f9c3844efc554239, type: 2}
+  - {fileID: 11400000, guid: d09d2af2300cdb94894510029396462f, type: 2}
+  - {fileID: 11400000, guid: 2a372226109030c4d9a4ecb2a04fc7a6, type: 2}
+  - {fileID: 11400000, guid: 68a72d819221be5428fba38cc3fa8471, type: 2}
+  passiveOfferChance: 0.7
+  offersCount: 3
+  preferUnownedWeapons: 1
+  upgradeOfferChanceWhileUnownedExist: 0.3
+  rarityChances:
+  - rarity: 0
+    baseChance: 50
+    luckBonusPerPoint: -3
+  - rarity: 1
+    baseChance: 27
+    luckBonusPerPoint: 1.5
+  - rarity: 2
+    baseChance: 14
+    luckBonusPerPoint: 1
+  - rarity: 3
+    baseChance: 6
+    luckBonusPerPoint: 0.4
+  - rarity: 4
+    baseChance: 3
+    luckBonusPerPoint: 0.1
+  pauseGameWhileOpen: 1
+  disableWhileOpen:
+  - {fileID: 0}
+  stopNavMeshAgents: 1
+--- !u!114 &1331419805406919757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6482196307012239779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80f9578d6a7d9a94da1d482709f0500d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PassiveInventory
+  stats: {fileID: 0}
+  debugLogs: 1
+  debugKeyPPrint: 1

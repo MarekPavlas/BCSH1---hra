@@ -14,28 +14,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponUpgradeConfig
   id: 0
   displayName: 
+  icon: {fileID: 21300000, guid: 14db4aa2914eeae4090c2173bec91405, type: 3}
   maxLevel: 3
   level1:
-    damage: 50
-    fireInterval: 0.1
-    range: 25
-    projectileSpeed: 20
-    aoeRadius: 0
-    projectileCount: 1
-    maxSimultaneous: -1
+    damage: 6
+    fireInterval: 0.8
+    range: 20
+    projectileSpeed: 24
   level2:
     damage: 8
-    fireInterval: 0.9
-    range: 27
-    projectileSpeed: 20
-    aoeRadius: 0
-    projectileCount: 1
-    maxSimultaneous: -1
+    fireInterval: 0.7
+    range: 22
+    projectileSpeed: 25
   level3:
     damage: 10
-    fireInterval: 0.75
-    range: 30
-    projectileSpeed: 22
-    aoeRadius: 0
-    projectileCount: 2
-    maxSimultaneous: -1
+    fireInterval: 0.6
+    range: 24
+    projectileSpeed: 27
+  upgradeToLevel2:
+    price: 25
+  upgradeToLevel3:
+    price: 50
